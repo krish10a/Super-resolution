@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+.env
+
+# PyTorch / model checkpoints
+*.pt
+*.pth
+*.onnx
+
+# Data / images
+data/raw/**/*
+data/pairs/**/*
+data/pairs_real/**/*
+!data/raw/.gitkeep
+!data/pairs/.gitkeep
+!data/pairs_real/.gitkeep
+*.png
+*.jpg
+*.jpeg
+
+# Outputs
+outputs/
+checkpoints/
+experiments/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Embedded / nested repos
+everything-claude-code/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
