@@ -180,9 +180,9 @@ class InferenceService:
             if info.architecture == "srcnn":
                 sr_img = self._srcnn_pipeline(model, lr_img, scale, device)
                 pipeline = "srcnn_bicubic_upsample"
-            elif info.architecture == "espcn":
+            elif info.architecture in ["espcn", "fsrcnn", "edsr"]:
                 sr_img = self._espcn_pipeline(model, lr_np, scale, device)
-                pipeline = "espcn_pixelshuffle"
+                pipeline = f"{info.architecture}_direct"
             else:
                 raise ValueError(f"Unsupported architecture: {info.architecture}")
         finally:

@@ -15,7 +15,7 @@ from models.espcn import ESPCN
 from losses.mse_loss import MSELoss
 from losses.perceptual_loss import HybridLoss
 from train.trainer import Trainer
-from data.dataset import PatchDataset
+from data.dataset import PatchDataset, ManifestPatchDataset, FullImageValDataset
 from metrics.psnr_ssim import compute_psnr_ssim
 from PIL import Image
 import torchvision.transforms.functional as TTF
@@ -82,6 +82,8 @@ def main():
     parser.add_argument('--exp', required=True, help='Experiment id, e.g. E4')
     parser.add_argument('--data-dir', default='data/pairs',
                         help='Root directory containing dataset pairs (default: data/pairs)')
+    parser.add_argument('--legacy-data', action='store_true',
+                        help='Use legacy directory pairs instead of canonical manifest')
     parser.add_argument('--val-split', type=float, default=0.0,
                         help='Fraction of train_set HR images to hold out as validation (0.0 disables)')
     parser.add_argument('--log-file', default=None,
@@ -163,65 +165,76 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     # --- Data ---
-    base = args.data_dir
-    train_hr = os.path.join(base, f'{train_set}_HR')
-    val_lr = os.path.join(base, f'{test_set}_LR_x{scale}')
-    val_hr = os.path.join(base, f'{test_set}_HR')
-
-    if args.degrade:
-        # On-the-fly degradation: generate LR from HR during training.
-        if not os.path.isdir(train_hr):
-            raise FileNotFoundError(
-                f'Data dir missing: {train_hr}\n'
-                f'Run: python data/download_sets.py && python data/prepare_pairs.py'
-            )
-        if args.val_split > 0:
-            train_names, val_names = split_train_val(train_hr, args.val_split)
-            train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
-                                    patch_size=patch_size, upsample_lr=upsample_lr,
-                                    degrade_on_the_fly=True,
-                                    degradation_kwargs=degradation_kwargs,
-                                    file_names=train_names)
-            val_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
-                                  patch_size=patch_size, upsample_lr=upsample_lr,
-                                  degrade_on_the_fly=True,
-                                  degradation_kwargs=degradation_kwargs,
-                                  file_names=val_names)
-            print(f'Train/val split: {len(train_names)} train / {len(val_names)} val images '
-                  f'(from {train_set})')
-        else:
-            train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
-                                    patch_size=patch_size, upsample_lr=upsample_lr,
-                                    degrade_on_the_fly=True,
-                                    degradation_kwargs=degradation_kwargs)
-            val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
-                                  upsample_lr=upsample_lr)
-            print(f'Training with on-the-fly degradation from HR dir: {train_hr}')
+    manifest_file = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'dataset_manifest.json')
+    if not args.legacy_data and os.path.exists(manifest_file):
+        print(f"Loading canonical manifest-based data (Zero test-leakage mode)")
+        train_ds = ManifestPatchDataset(manifest_path=manifest_file, dataset=train_set,
+                                        split='train', scale=scale, patch_size=patch_size,
+                                        upsample_lr=upsample_lr)
+        val_ds = FullImageValDataset(manifest_path=manifest_file, dataset=train_set,
+                                     split='val', scale=scale, upsample_lr=upsample_lr)
+        print(f"Clean training split: {len(train_ds.entries)} train images, {len(val_ds.entries)} full val images (from {train_set})")
+        val_lr, val_hr = None, None
     else:
-        train_lr = os.path.join(base, f'{train_set}_LR_x{scale}')
-        for d in [train_lr, train_hr, val_lr, val_hr]:
-            if not os.path.isdir(d):
+        base = args.data_dir
+        train_hr = os.path.join(base, f'{train_set}_HR')
+        val_lr = os.path.join(base, f'{test_set}_LR_x{scale}')
+        val_hr = os.path.join(base, f'{test_set}_HR')
+
+        if args.degrade:
+            # On-the-fly degradation: generate LR from HR during training.
+            if not os.path.isdir(train_hr):
                 raise FileNotFoundError(
-                    f'Data dir missing: {d}\n'
+                    f'Data dir missing: {train_hr}\n'
                     f'Run: python data/download_sets.py && python data/prepare_pairs.py'
                 )
-        if args.val_split > 0:
-            train_names, val_names = split_train_val(train_hr, args.val_split)
-            train_ds = PatchDataset(train_lr, train_hr, scale=scale,
-                                    patch_size=patch_size, upsample_lr=upsample_lr,
-                                    file_names=train_names)
-            # Validation on held-out train_set images (LR/HR from train dirs)
-            val_ds = PatchDataset(train_lr, train_hr, scale=scale,
-                                  patch_size=patch_size, upsample_lr=upsample_lr,
-                                  file_names=val_names)
-            print(f'Train/val split: {len(train_names)} train / {len(val_names)} val images '
-                  f'(from {train_set})')
+            if args.val_split > 0:
+                train_names, val_names = split_train_val(train_hr, args.val_split)
+                train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
+                                        patch_size=patch_size, upsample_lr=upsample_lr,
+                                        degrade_on_the_fly=True,
+                                        degradation_kwargs=degradation_kwargs,
+                                        file_names=train_names)
+                val_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
+                                      patch_size=patch_size, upsample_lr=upsample_lr,
+                                      degrade_on_the_fly=True,
+                                      degradation_kwargs=degradation_kwargs,
+                                      file_names=val_names)
+                print(f'Train/val split: {len(train_names)} train / {len(val_names)} val images '
+                      f'(from {train_set})')
+            else:
+                train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
+                                        patch_size=patch_size, upsample_lr=upsample_lr,
+                                        degrade_on_the_fly=True,
+                                        degradation_kwargs=degradation_kwargs)
+                val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
+                                      upsample_lr=upsample_lr)
+                print(f'Training with on-the-fly degradation from HR dir: {train_hr}')
         else:
-            train_ds = PatchDataset(train_lr, train_hr, scale=scale,
-                                    patch_size=patch_size, upsample_lr=upsample_lr)
-            val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
-                                  upsample_lr=upsample_lr)
-            print(f'Cross-dataset validation on {test_set} ({len(os.listdir(val_hr))} images)')
+            train_lr = os.path.join(base, f'{train_set}_LR_x{scale}')
+            for d in [train_lr, train_hr, val_lr, val_hr]:
+                if not os.path.isdir(d):
+                    raise FileNotFoundError(
+                        f'Data dir missing: {d}\n'
+                        f'Run: python data/download_sets.py && python data/prepare_pairs.py'
+                    )
+            if args.val_split > 0:
+                train_names, val_names = split_train_val(train_hr, args.val_split)
+                train_ds = PatchDataset(train_lr, train_hr, scale=scale,
+                                        patch_size=patch_size, upsample_lr=upsample_lr,
+                                        file_names=train_names)
+                # Validation on held-out train_set images (LR/HR from train dirs)
+                val_ds = PatchDataset(train_lr, train_hr, scale=scale,
+                                      patch_size=patch_size, upsample_lr=upsample_lr,
+                                      file_names=val_names)
+                print(f'Train/val split: {len(train_names)} train / {len(val_names)} val images '
+                      f'(from {train_set})')
+            else:
+                train_ds = PatchDataset(train_lr, train_hr, scale=scale,
+                                        patch_size=patch_size, upsample_lr=upsample_lr)
+                val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
+                                      upsample_lr=upsample_lr)
+                print(f'Cross-dataset validation on {test_set} ({len(os.listdir(val_hr))} images)')
 
     # Windows: num_workers=0, no pin_memory on CPU
     num_workers = 0
@@ -234,9 +247,20 @@ def main():
     scaler = torch.amp.GradScaler('cuda') if (device == 'cuda') else None
     trainer = Trainer(model, loss_fn, optimizer, device, scaler=scaler)
 
-    # --- Bicubic baseline (on test_set, reference only) ---
-    base_psnr, base_ssim = bicubic_baseline(val_lr, val_hr, scale, device)
-    print(f'Bicubic baseline on {test_set} x{scale}: PSNR {base_psnr:.2f} SSIM {base_ssim:.4f}')
+    # --- Bicubic baseline ---
+    if val_lr and val_hr:
+        base_psnr, base_ssim = bicubic_baseline(val_lr, val_hr, scale, device)
+        print(f'Bicubic baseline on {test_set} x{scale}: PSNR {base_psnr:.2f} SSIM {base_ssim:.4f}')
+    else:
+        # Compute baseline on held-out validation split
+        val_psnrs, val_ssims = [], []
+        for lr_t, hr_t, _ in val_ds:
+            up_t = torch.nn.functional.interpolate(lr_t.unsqueeze(0), scale_factor=scale, mode='bicubic', align_corners=False).squeeze(0)
+            p, s = compute_psnr_ssim(up_t, hr_t, scale=scale, y_channel=True)
+            val_psnrs.append(p); val_ssims.append(s)
+        base_psnr = float(np.mean(val_psnrs))
+        base_ssim = float(np.mean(val_ssims))
+        print(f'Bicubic baseline on {train_set} val split x{scale}: PSNR {base_psnr:.2f} SSIM {base_ssim:.4f}')
 
     # --- Epoch log file ---
     log_file = args.log_file

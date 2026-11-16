@@ -1,0 +1,28 @@
+{
+  "investigation": "1.3219 dB Historical Discrepancy Parity Investigation",
+  "dataset": "BSD100",
+  "scale": 2,
+  "n_images": 100,
+  "findings": {
+    "historical_reported": {
+      "bicubic_psnr": 29.96,
+      "espcn_e5_psnr": 28.64,
+      "reported_delta": -1.32
+    },
+    "canonical_reproduced": {
+      "bicubic_psnr": 29.54715633392334,
+      "bicubic_ssim": 0.8568648883114547,
+      "espcn_e5_psnr": 29.289872694015504,
+      "espcn_e5_ssim": 0.8544571689330744,
+      "actual_delta_psnr": -0.2572836399078362,
+      "actual_delta_ssim": -0.0024077193783803
+    },
+    "mathematical_analysis": {
+      "studio_swing_ratio": "219 / 255 = 0.85882",
+      "squared_ratio": "0.73758",
+      "theoretical_db_shift": 1.3219213118767368,
+      "formula": "10 * log10(1.0 / (219/255)^2)",
+      "discrepancy_explanation": "The -1.32 dB gap in PROJECT_CONTEXT.md was caused by subtracting the theoretical studio-swing shift (1.3219 dB) from 29.96 dB (yielding 28.64 dB). In reality, when both prediction and ground truth are scaled identically by 219/255 and max_val=1.0, PSNR increases rather than decreases. Actual model evaluation on canonical BSD100 proves E5 achieves 29.2899 dB vs Bicubic 29.5472 dB, a real physical difference of only -0.2573 dB caused by 15-epoch undertraining."
+    }
+  }
+}

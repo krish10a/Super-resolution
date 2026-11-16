@@ -1,0 +1,107 @@
+# Phase 3 DIV2K Experiments Configuration (E9-E14)
+# Optimized for NVIDIA GeForce RTX 2050 (4GB VRAM)
+# Mixed precision (AMP), Cosine Annealing, Gradient Clipping
+
+global_settings:
+  seed: 42
+  num_workers: 0          # Windows DataLoader safe setting
+  amp: true               # Mixed precision (torch.amp.autocast)
+  grad_clip: 1.0          # Gradient norm clipping for numerical stability
+  save_every_epochs: 5    # Periodic recovery checkpoint interval
+  val_max_images: 10      # Fast validation sample per epoch
+  checkpoints_dir: outputs/checkpoints/phase3
+
+experiments:
+  E9:
+    model: espcn
+    scale: 2
+    loss: charbonnier
+    charbonnier_eps: 1.0e-3
+    lr: 5.0e-4
+    min_lr: 1.0e-6
+    optimizer: adam
+    scheduler: cosine
+    batch_size: 16
+    lr_patch_size: 32
+    patches_per_image: 10
+    max_epochs: 50
+    early_stop_patience: 15
+
+  E10:
+    model: fsrcnn
+    scale: 2
+    loss: charbonnier
+    charbonnier_eps: 1.0e-3
+    lr: 5.0e-4
+    min_lr: 1.0e-6
+    optimizer: adam
+    scheduler: cosine
+    batch_size: 16
+    lr_patch_size: 32
+    patches_per_image: 10
+    max_epochs: 50
+    early_stop_patience: 15
+
+  E11:
+    model: edsr
+    scale: 2
+    loss: l1
+    n_feats: 64
+    n_resblocks: 16
+    res_scale: 1.0
+    lr: 1.0e-4
+    min_lr: 1.0e-6
+    optimizer: adam
+    scheduler: cosine
+    batch_size: 8
+    lr_patch_size: 48
+    patches_per_image: 10
+    max_epochs: 50
+    early_stop_patience: 15
+
+  E12:
+    model: espcn
+    scale: 4
+    loss: charbonnier
+    charbonnier_eps: 1.0e-3
+    lr: 5.0e-4
+    min_lr: 1.0e-6
+    optimizer: adam
+    scheduler: cosine
+    batch_size: 16
+    lr_patch_size: 32
+    patches_per_image: 10
+    max_epochs: 50
+    early_stop_patience: 15
+
+  E13:
+    model: fsrcnn
+    scale: 4
+    loss: charbonnier
+    charbonnier_eps: 1.0e-3
+    lr: 5.0e-4
+    min_lr: 1.0e-6
+    optimizer: adam
+    scheduler: cosine
+    batch_size: 16
+    lr_patch_size: 32
+    patches_per_image: 10
+    max_epochs: 50
+    early_stop_patience: 15
+
+  E14:
+    model: edsr
+    scale: 4
+    loss: l1
+    n_feats: 64
+    n_resblocks: 16
+    res_scale: 1.0
+    lr: 1.0e-4
+    min_lr: 1.0e-6
+    optimizer: adam
+    scheduler: cosine
+    batch_size: 8
+    lr_patch_size: 32
+    patches_per_image: 10
+    max_epochs: 50
+    early_stop_patience: 15

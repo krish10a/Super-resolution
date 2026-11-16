@@ -2,15 +2,16 @@ import torch.nn as nn
 import torch
 
 class ESPCN(nn.Module):
-    def __init__(self, scale=2, channels=64):
+    def __init__(self, scale=2, channels=64, mid_channels=None):
         super().__init__()
         self.scale = scale
+        mid_ch = mid_channels if mid_channels is not None else channels
         self.net = nn.Sequential(
             nn.Conv2d(3, channels, kernel_size=5, padding=2),
             nn.ReLU(inplace=True),
-            nn.Conv2d(channels, channels, kernel_size=3, padding=1),
+            nn.Conv2d(channels, mid_ch, kernel_size=3, padding=1),
             nn.ReLU(inplace=True),
-            nn.Conv2d(channels, 3 * (scale ** 2), kernel_size=3, padding=1),
+            nn.Conv2d(mid_ch, 3 * (scale ** 2), kernel_size=3, padding=1),
         )
         self.pixel_shuffle = nn.PixelShuffle(scale)
         self._init_weights()

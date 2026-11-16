@@ -108,3 +108,124 @@ class PatchDataset(Dataset):
             if self.upsample_lr:
                 lr_c = lr_c.resize(hr_c.size, Image.BICUBIC)
             return TF.to_tensor(lr_c), TF.to_tensor(hr_c)
+
+
+# ---------------------------------------------------------------------------
+# Canonical Manifest-Driven Datasets (Phase 2 Clean Train/Val Separation)
+# ---------------------------------------------------------------------------
+import json
+from pathlib import Path
+
+class ManifestPatchDataset(Dataset):
+    """Clean training dataset driven by canonical dataset manifest.
+
+    Extracts patches strictly from training images (e.g. 80 T91 train images).
+    Guarantees zero overlap with held-out validation or official test benchmarks.
+    """
+    def __init__(self, manifest_path=None, dataset='T91', split='train', scale=2,
+                 patch_size=32, upsample_lr=False, patches_per_image=10, seed=42):
+        self.scale = scale
+        self.patch_size = patch_size
+        self.upsample_lr = upsample_lr
+        self.patches_per_image = patches_per_image
+        self.rng = random.Random(seed)
+
+        if manifest_path is None:
+            manifest_path = Path(__file__).resolve().parents[1] / "data" / "dataset_manifest.json"
+        with open(manifest_path, "r") as f:
+            manifest = json.load(f)
+
+        project_root = Path(manifest_path).resolve().parents[1]
+        self.entries = [
+            e for e in manifest["entries"]
+            if e["dataset"] == dataset and e["split"] == split
+        ]
+        if not self.entries:
+            raise ValueError(f"No entries found for dataset='{dataset}', split='{split}' in {manifest_path}")
+
+        self.cached_images = []
+        for e in self.entries:
+            hr_p = project_root / e["hr_path"]
+            lr_p = project_root / e[f"lr_x{scale}_path"]
+            hr_img = Image.open(hr_p).convert("RGB")
+            lr_img = Image.open(lr_p).convert("RGB")
+            self.cached_images.append((lr_img, hr_img, e["image_id"]))
+
+    def __len__(self):
+        return len(self.cached_images) * self.patches_per_image
+
+    def __getitem__(self, idx):
+        pair_idx = idx % len(self.cached_images)
+        lr_img, hr_img, _ = self.cached_images[pair_idx]
+
+        w, h = lr_img.size
+        if w < self.patch_size or h < self.patch_size:
+            lr_img = lr_img.resize((max(w, self.patch_size), max(h, self.patch_size)), Image.BICUBIC)
+            hr_img = hr_img.resize((w * self.scale, h * self.scale), Image.BICUBIC)
+            w, h = lr_img.size
+
+        left = self.rng.randint(0, w - self.patch_size)
+        top = self.rng.randint(0, h - self.patch_size)
+
+        lr_c = lr_img.crop((left, top, left + self.patch_size, top + self.patch_size))
+        hr_left, hr_top = left * self.scale, top * self.scale
+        hr_c = hr_img.crop((hr_left, hr_top, hr_left + self.patch_size * self.scale, hr_top + self.patch_size * self.scale))
+
+        # Data augmentations: horizontal flip, vertical flip, 90-degree rotations
+        if self.rng.random() > 0.5:
+            lr_c = TF.hflip(lr_c)
+            hr_c = TF.hflip(hr_c)
+        if self.rng.random() > 0.5:
+            lr_c = TF.vflip(lr_c)
+            hr_c = TF.vflip(hr_c)
+
+        rot_choice = self.rng.choice([0, 90, 180, 270])
+        if rot_choice > 0:
+            lr_c = TF.rotate(lr_c, rot_choice)
+            hr_c = TF.rotate(hr_c, rot_choice)
+
+        if self.upsample_lr:
+            lr_c = lr_c.resize(hr_c.size, Image.BICUBIC)
+
+        return TF.to_tensor(lr_c), TF.to_tensor(hr_c)
+
+
+class FullImageValDataset(Dataset):
+    """Deterministic full-image validation dataset.
+
+    Evaluates on held-out original images (e.g. 11 T91 validation images) without
+    random patch sampling or flipping.
+    """
+    def __init__(self, manifest_path=None, dataset='T91', split='val', scale=2, upsample_lr=False):
+        self.scale = scale
+        self.upsample_lr = upsample_lr
+
+        if manifest_path is None:
+            manifest_path = Path(__file__).resolve().parents[1] / "data" / "dataset_manifest.json"
+        with open(manifest_path, "r") as f:
+            manifest = json.load(f)
+
+        project_root = Path(manifest_path).resolve().parents[1]
+        self.entries = [
+            e for e in manifest["entries"]
+            if e["dataset"] == dataset and e["split"] == split
+        ]
+        if not self.entries:
+            raise ValueError(f"No validation entries found for dataset='{dataset}', split='{split}'")
+
+        self.cached_images = []
+        for e in self.entries:
+            hr_p = project_root / e["hr_path"]
+            lr_p = project_root / e[f"lr_x{scale}_path"]
+            hr_img = Image.open(hr_p).convert("RGB")
+            lr_img = Image.open(lr_p).convert("RGB")
+            self.cached_images.append((lr_img, hr_img, e["image_id"]))
+
+    def __len__(self):
+        return len(self.cached_images)
+
+    def __getitem__(self, idx):
+        lr_img, hr_img, image_id = self.cached_images[idx]
+        if self.upsample_lr:
+            lr_img = lr_img.resize(hr_img.size, Image.BICUBIC)
+        return TF.to_tensor(lr_img), TF.to_tensor(hr_img), image_id

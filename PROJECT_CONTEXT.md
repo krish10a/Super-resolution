@@ -3,7 +3,7 @@
 > **Single Source of Truth & Technical Reference Manual**  
 > **Repository:** [https://github.com/krish10a/Super-resolution.git](https://github.com/krish10a/Super-resolution.git)  
 > **Branch:** `main` | **Working Directory:** `C:\Users\ASUS\Desktop\cv`  
-> **Status:** Production Ready · 8 Models Trained & Benchmarked · 105/105 Unit Tests Passing · Full-Stack Interactive Studio Released  
+> **Status:** Production Ready · 14 Models Cataloged & Benchmarked (E1–E14) · 135/135 Unit Tests Passing · Full-Stack Interactive Studio Released  
 > **Last Updated:** 2026-11-16  
 
 ---
@@ -194,9 +194,22 @@ All quantitative metrics reported in this project conform strictly to the academ
 
 ---
 
-## 3. Experiment Matrix & Checkpoint Catalog (E1–E8)
+## 3. Experiment Matrix & Checkpoint Catalog (E1–E14)
 
-All 8 canonical models were trained on the **T91** training set (91 high-resolution images divided into $32\times 32$ LR patches) with 10% validation holdout, using Adam optimizer ($lr = 2 \times 10^{-4}$), batch size 16 (MSE) / 8 (Perceptual), maximum 15 epochs, and early-stopping patience of 6.
+### 3.1 Phase 3 DIV2K Models (E9–E14) — Production Authoritative
+Trained on the **DIV2K** benchmark dataset (800 train, 100 validation images) using Adam optimizer, Cosine Annealing learning rate schedule ($lr = 5\times 10^{-4} \to 10^{-6}$), batch size 16 (ESPCN/FSRCNN) / 8 (EDSR), AMP mixed precision on NVIDIA RTX 2050 (4GB), and 50 epochs.
+
+| Exp ID | Architecture | Scale | Loss Objective | Checkpoint File | Param Count | Best DIV2K Val PSNR | Status |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **E9** | ESPCN ($64\to 32$) | $2\times$ | Charbonnier ($\epsilon=10^{-3}$) | `outputs/checkpoints/phase3/E9_espcn_2x_best.pt` | 26,796 | **34.49 dB / 0.9178** | VERIFIED |
+| **E10** | FSRCNN ($56-12-4$) | $2\times$ | Charbonnier ($\epsilon=10^{-3}$) | `outputs/checkpoints/phase3/E10_fsrcnn_2x_best.pt` | 24,683 | **34.08 dB / 0.9149** | VERIFIED |
+| **E11** | EDSR-Baseline | $2\times$ | L1 | `outputs/checkpoints/phase3/E11_edsr_2x_best.pt` | 1,369,859 | **35.43 dB / 0.9266** | VERIFIED |
+| **E12** | ESPCN ($64\to 32$) | $4\times$ | Charbonnier ($\epsilon=10^{-3}$) | `outputs/checkpoints/phase3/E12_espcn_4x_best.pt` | 37,200 | **28.48 dB / 0.7850** | VERIFIED |
+| **E13** | FSRCNN ($56-12-4$) | $4\times$ | Charbonnier ($\epsilon=10^{-3}$) | `outputs/checkpoints/phase3/E13_fsrcnn_4x_best.pt` | 24,683 | **28.30 dB / 0.7820** | VERIFIED |
+| **E14** | EDSR-Baseline | $4\times$ | L1 | `outputs/checkpoints/phase3/E14_edsr_4x_best.pt` | 1,517,571 | **29.17 dB / 0.8020** | VERIFIED |
+
+### 3.2 Legacy Experiments (E1–E8) — Preserved Historical Baseline
+Trained on T91 (91 images) for 15 epochs. Preserved under `outputs/checkpoints/` for comparative lineage.
 
 | Exp ID | Architecture | Scale | Loss Objective | Checkpoint File | Checkpoint Size | Param Count | Best Val PSNR | Training Epochs |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
@@ -204,32 +217,32 @@ All 8 canonical models were trained on the **T91** training set (91 high-resolut
 | **E2** | SRCNN | $2\times$ | MSE + Perceptual | `srcnn_2x_mse_perceptual.pt` | 83.9 KB | 20,099 | 26.62 dB | 13 (Early stop) |
 | **E3** | SRCNN | $4\times$ | MSE | `srcnn_4x_mse.pt` | 83.6 KB | 20,099 | 25.76 dB | 15 / 15 |
 | **E4** | SRCNN | $4\times$ | MSE + Perceptual | `srcnn_4x_mse_perceptual.pt` | 83.9 KB | 20,099 | 23.59 dB | 15 / 15 |
-| **E5** | ESPCN | $2\times$ | MSE | `espcn_2x_mse.pt` | 198.0 KB | 24,716 | 29.37 dB | 15 / 15 |
-| **E6** | ESPCN | $2\times$ | MSE + Perceptual | `espcn_2x_mse_perceptual.pt` | 198.4 KB | 24,716 | 28.61 dB | 15 / 15 |
-| **E7** | ESPCN | $4\times$ | MSE | `espcn_4x_mse.pt` | 281.2 KB | 60,652 | 23.15 dB | 15 / 15 |
-| **E8** | ESPCN | $4\times$ | MSE + Perceptual | `espcn_4x_mse_perceptual.pt` | 281.4 KB | 60,652 | 23.06 dB | 15 / 15 |
-
-> **Checkpoint Storage**: Canonical weights are persisted under `outputs/checkpoints/` and tracked in the Git repository. Total footprint of all 8 models is **$\approx 1.2\text{ MB}$**, enabling immediate inference without cloud weight downloading.
+| **E5** | ESPCN | $2\times$ | MSE | `espcn_2x_mse.pt` | 198.0 KB | 48,716 | 29.37 dB | 15 / 15 |
+| **E6** | ESPCN | $2\times$ | MSE + Perceptual | `espcn_2x_mse_perceptual.pt` | 198.4 KB | 48,716 | 28.61 dB | 15 / 15 |
+| **E7** | ESPCN | $4\times$ | MSE | `espcn_4x_mse.pt` | 281.2 KB | 69,488 | 23.15 dB | 15 / 15 |
+| **E8** | ESPCN | $4\times$ | MSE + Perceptual | `espcn_4x_mse_perceptual.pt` | 281.4 KB | 69,488 | 23.06 dB | 15 / 15 |
 
 ---
 
 ## 4. Comprehensive Benchmark Results & Analysis
 
-### 4.1 Quantitative Results Table
-Evaluated across **Set5** ($n=10$), **Set14** ($n=28$), and **BSD100** ($n=100$) on the Y-channel with scale border shaving.
+### 4.1 Authoritative Canonical Benchmark Results Table
+Evaluated across **Set5** ($n=5$), **Set14** ($n=14$), and **BSD100** ($n=100$) on the Y-channel with scale border shaving ($s$ pixels) using GPU acceleration on NVIDIA RTX 2050.
 
-| Exp | Model | Scale | Loss | Set5 PSNR / SSIM | Set14 PSNR / SSIM | BSD100 PSNR / SSIM | Latency (RTX 2050) | $\Delta$ PSNR vs Bicubic |
+| Exp ID | Model | Scale | Loss | Set5 ($n=5$) PSNR / SSIM | Set14 ($n=14$) PSNR / SSIM | BSD100 ($n=100$) PSNR / SSIM | Latency (RTX 2050) | $\Delta$ PSNR vs Bicubic (Set5) |
 | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **E1** | SRCNN | $2\times$ | MSE | 27.62 / 0.9004 | 26.90 / 0.8820 | 26.41 / 0.8283 | 18 ms | −3.49 dB |
-| **E2** | SRCNN | $2\times$ | MSE+Perc | 27.59 / **0.9255** | 25.92 / **0.9005** | 24.86 / 0.8467 | 18 ms | −4.48 dB |
-| **E3** | SRCNN | $4\times$ | MSE | 24.67 / 0.8331 | 23.59 / 0.7872 | 23.33 / 0.6545 | 21 ms | −1.47 dB |
-| **E4** | SRCNN | $4\times$ | MSE+Perc | 22.94 / 0.8142 | 22.38 / 0.7632 | 22.55 / 0.6144 | 21 ms | −2.25 dB |
-| **E5** | ESPCN | $2\times$ | MSE | **28.59** / 0.7628 | **28.38** / 0.8287 | **28.64** / 0.8353 | **11 ms** | **−1.32 dB** |
-| **E6** | ESPCN | $2\times$ | MSE+Perc | 28.36 / 0.7521 | 27.59 / 0.8047 | 28.08 / 0.8353 | **11 ms** | −1.88 dB |
-| **E7** | ESPCN | $4\times$ | MSE | 23.94 / 0.5792 | 24.09 / 0.6239 | 23.96 / 0.5923 | **14 ms** | −0.84 dB |
-| **E8** | ESPCN | $4\times$ | MSE+Perc | 23.63 / **0.6925** | 23.54 / **0.6989** | 23.90 / **0.6195** | **14 ms** | −0.90 dB |
-| *Ref* | *Bicubic* | $2\times$ | *Baseline* | *32.09 / 0.9508* | *30.40 / 0.9273* | *29.96 / 0.8775* | *4 ms* | *0.00 dB* |
-| *Ref* | *Bicubic* | $4\times$ | *Baseline* | *26.98 / 0.8637* | *25.76 / 0.8131* | *24.80 / 0.6817* | *5 ms* | *0.00 dB* |
+| *Ref* | *Bicubic* | $2\times$ | *Baseline* | *33.64 / 0.9369* | *30.31 / 0.8814* | *29.55 / 0.8569* | *1.2 ms* | *0.00 dB* |
+| **E9** | ESPCN | $2\times$ | Charbonnier | **35.58 / 0.9536** | **31.80 / 0.9090** | **30.85 / 0.8927** | **5.7 ms** | **+1.94 dB** |
+| **E10** | FSRCNN | $2\times$ | Charbonnier | **34.81 / 0.9478** | **31.29 / 0.9043** | **30.51 / 0.8883** | **12.6 ms** | **+1.17 dB** |
+| **E11** | EDSR | $2\times$ | L1 | **36.75 / 0.9607** | **32.43 / 0.9166** | **31.39 / 0.9000** | **43.0 ms** | **+3.10 dB** |
+| **E1** | SRCNN | $2\times$ | MSE | 28.85 / 0.9044 | 27.34 / 0.8527 | 26.72 / 0.8342 | 66.5 ms | −4.79 dB |
+| **E5** | ESPCN | $2\times$ | MSE | 31.99 / 0.9021 | 29.39 / 0.8589 | 29.29 / 0.8545 | 7.0 ms | −1.65 dB |
+| *Ref* | *Bicubic* | $4\times$ | *Baseline* | *28.42 / 0.8230* | *26.08 / 0.7216* | *25.96 / 0.6856* | *1.0 ms* | *0.00 dB* |
+| **E12** | ESPCN | $4\times$ | Charbonnier | **29.37 / 0.8444** | **26.74 / 0.7497** | **26.46 / 0.7171** | **4.7 ms** | **+0.95 dB** |
+| **E13** | FSRCNN | $4\times$ | Charbonnier | **29.06 / 0.8385** | **26.52 / 0.7459** | **26.36 / 0.7138** | **9.4 ms** | **+0.64 dB** |
+| **E14** | EDSR | $4\times$ | L1 | **30.70 / 0.8809** | **27.63 / 0.7752** | **26.99 / 0.7352** | **19.5 ms** | **+2.28 dB** |
+| **E3** | SRCNN | $4\times$ | MSE | 26.30 / 0.8170 | 24.58 / 0.7222 | 24.55 / 0.6903 | 17.8 ms | −2.11 dB |
+| **E7** | ESPCN | $4\times$ | MSE | 27.15 / 0.7882 | 25.07 / 0.6908 | 25.11 / 0.6563 | 8.1 ms | −1.27 dB |
 
 ---
 

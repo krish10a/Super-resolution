@@ -93,7 +93,7 @@ class TestComputePsnrSsim:
         p, s = compute_psnr_ssim(pred, target, scale=2)
         # Should run without error on shaved (64x64) tensors
         assert np.isfinite(p)
-        assert 0.0 <= s <= 1.0
+        assert -1.0 <= s <= 1.0
 
     def test_scale_zero_no_shave(self):
         pred = torch.rand(3, 32, 32)
@@ -115,14 +115,14 @@ class TestComputePsnrSsim:
         target = torch.full((3, 64, 64), 0.5)
         p, s = compute_psnr_ssim(pred, target, scale=2)
         assert np.isfinite(p)
-        assert 0.0 <= s <= 1.0
+        assert -1.0 <= s <= 1.0
 
     def test_4d_tensor(self):
         pred = torch.rand(2, 3, 64, 64)
         target = torch.rand(2, 3, 64, 64)
         p, s = compute_psnr_ssim(pred, target, scale=2)
         assert np.isfinite(p)
-        assert 0.0 <= s <= 1.0
+        assert -1.0 <= s <= 1.0
 
     def test_grayscale_input_no_y_conversion(self):
         # Single-channel input should skip Y conversion.

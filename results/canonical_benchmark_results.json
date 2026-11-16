@@ -1,0 +1,596 @@
+{
+  "metadata": {
+    "timestamp": "2026-11-16 21:30:22",
+    "device": "cuda",
+    "manifest_version": "2.0.0",
+    "protocol": "MATLAB-compatible bicubic downsampling with antialiasing"
+  },
+  "baselines": {
+    "2x": {
+      "Set5": {
+        "psnr_mean": 33.6405987739563,
+        "psnr_std": 3.5639802200563078,
+        "ssim_mean": 0.9368876557414308,
+        "ssim_std": 0.0353662736997665,
+        "latency_ms": 1.2220599994179793,
+        "n_images": 5
+      },
+      "Set14": {
+        "psnr_mean": 30.308257341384888,
+        "psnr_std": 3.3416573282191053,
+        "ssim_mean": 0.8813552258572103,
+        "ssim_std": 0.06291393406176317,
+        "latency_ms": 2.3997214294857776,
+        "n_images": 14
+      },
+      "BSD100": {
+        "psnr_mean": 29.54715633392334,
+        "psnr_std": 3.504754701865446,
+        "ssim_mean": 0.8569422740214644,
+        "ssim_std": 0.07292977725001723,
+        "latency_ms": 1.6391879997900105,
+        "n_images": 100
+      }
+    },
+    "4x": {
+      "Set5": {
+        "psnr_mean": 28.419381141662598,
+        "psnr_std": 3.6908837438681634,
+        "ssim_mean": 0.8230289766685935,
+        "ssim_std": 0.05176892979356324,
+        "latency_ms": 1.042299999971874,
+        "n_images": 5
+      },
+      "Set14": {
+        "psnr_mean": 26.083001579557145,
+        "psnr_std": 3.1056022448336855,
+        "ssim_mean": 0.7215638877997769,
+        "ssim_std": 0.12236426031022143,
+        "latency_ms": 2.079835713759946,
+        "n_images": 14
+      },
+      "BSD100": {
+        "psnr_mean": 25.95588536262512,
+        "psnr_std": 3.2247626491751546,
+        "ssim_mean": 0.6856432000151442,
+        "ssim_std": 0.12510688444861134,
+        "latency_ms": 1.3443119999647024,
+        "n_images": 100
+      }
+    }
+  },
+  "models": {
+    "E5": {
+      "name": "E5_ESPCN_2x_MSE",
+      "model_type": "espcn",
+      "scale": 2,
+      "loss": "mse",
+      "group": "legacy",
+      "params": 48716,
+      "checkpoint": "outputs/checkpoints/espcn_2x_mse.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 31.994439601898193,
+          "psnr_std": 3.0001569549012412,
+          "ssim_mean": 0.9021156482074014,
+          "ssim_std": 0.031623931807669876,
+          "latency_ms": 6.992839998565614,
+          "delta_psnr_vs_bicubic": -1.6461591720581055,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 29.386842932019913,
+          "psnr_std": 2.8965995081900173,
+          "ssim_mean": 0.8588796700478757,
+          "ssim_std": 0.05310161609657506,
+          "latency_ms": 6.656378571278765,
+          "delta_psnr_vs_bicubic": -0.9214144093649743,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 29.289872694015504,
+          "psnr_std": 3.263228959664286,
+          "ssim_mean": 0.8545424911612165,
+          "ssim_std": 0.061474497821157895,
+          "latency_ms": 3.2267439998395275,
+          "delta_psnr_vs_bicubic": -0.2572836399078362,
+          "n_images": 100
+        }
+      }
+    },
+    "E9": {
+      "name": "E9_ESPCN_2x_Charbonnier",
+      "model_type": "espcn",
+      "scale": 2,
+      "loss": "charbonnier",
+      "group": "phase3",
+      "params": 26796,
+      "checkpoint": "outputs/checkpoints/phase3/E9_espcn_2x_best.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 35.58002519607544,
+          "psnr_std": 3.064510902975449,
+          "ssim_mean": 0.9536383004522548,
+          "ssim_std": 0.03043079437819574,
+          "latency_ms": 5.705720000696601,
+          "delta_psnr_vs_bicubic": 1.9394264221191406,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 31.797617844172887,
+          "psnr_std": 3.4485786831850707,
+          "ssim_mean": 0.909027652399511,
+          "ssim_std": 0.04914236269844562,
+          "latency_ms": 5.000350000305583,
+          "delta_psnr_vs_bicubic": 1.4893605027879993,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 30.84527518749237,
+          "psnr_std": 3.7309897173677236,
+          "ssim_mean": 0.8927335371161541,
+          "ssim_std": 0.057662980215212295,
+          "latency_ms": 2.64085899998463,
+          "delta_psnr_vs_bicubic": 1.2981188535690293,
+          "n_images": 100
+        }
+      }
+    },
+    "E12": {
+      "name": "E12_ESPCN_4x_Charbonnier",
+      "model_type": "espcn",
+      "scale": 4,
+      "loss": "charbonnier",
+      "group": "phase3",
+      "params": 37200,
+      "checkpoint": "outputs/checkpoints/phase3/E12_espcn_4x_best.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 29.37410831451416,
+          "psnr_std": 3.564687291123181,
+          "ssim_mean": 0.8443553252760279,
+          "ssim_std": 0.04913223395033591,
+          "latency_ms": 4.684919999999693,
+          "delta_psnr_vs_bicubic": 0.9547271728515625,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 26.740151132856095,
+          "psnr_std": 3.147261340006264,
+          "ssim_mean": 0.7497445618546177,
+          "ssim_std": 0.11088890833121877,
+          "latency_ms": 4.012728571459385,
+          "delta_psnr_vs_bicubic": 0.6571495532989502,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 26.46260368824005,
+          "psnr_std": 3.2918763816059755,
+          "ssim_mean": 0.717116758623728,
+          "ssim_std": 0.11527968142626228,
+          "latency_ms": 1.3773789998958819,
+          "delta_psnr_vs_bicubic": 0.5067183256149299,
+          "n_images": 100
+        }
+      }
+    },
+    "E10": {
+      "name": "E10_FSRCNN_2x_Charbonnier",
+      "model_type": "fsrcnn",
+      "scale": 2,
+      "loss": "charbonnier",
+      "group": "phase3",
+      "params": 24683,
+      "checkpoint": "outputs/checkpoints/phase3/E10_fsrcnn_2x_best.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 34.80627107620239,
+          "psnr_std": 3.3264261635899093,
+          "ssim_mean": 0.9478486927253224,
+          "ssim_std": 0.03066777802371173,
+          "latency_ms": 12.575499998638406,
+          "delta_psnr_vs_bicubic": 1.1656723022460938,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 31.29323669842311,
+          "psnr_std": 3.29874862182158,
+          "ssim_mean": 0.904284014328484,
+          "ssim_std": 0.04943088200050125,
+          "latency_ms": 9.068364285537557,
+          "delta_psnr_vs_bicubic": 0.9849793570382239,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 30.509587359428405,
+          "psnr_std": 3.592556851490018,
+          "ssim_mean": 0.8882549861526808,
+          "ssim_std": 0.05797815785784149,
+          "latency_ms": 4.478187000204343,
+          "delta_psnr_vs_bicubic": 0.9624310255050652,
+          "n_images": 100
+        }
+      }
+    },
+    "E11": {
+      "name": "E11_EDSR_2x_L1",
+      "model_type": "edsr",
+      "scale": 2,
+      "loss": "l1",
+      "group": "phase3",
+      "params": 1369859,
+      "checkpoint": "outputs/checkpoints/phase3/E11_edsr_2x_best.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 36.745347023010254,
+          "psnr_std": 2.8240693568514574,
+          "ssim_mean": 0.9606740434456904,
+          "ssim_std": 0.03174428570246822,
+          "latency_ms": 43.018659998779185,
+          "delta_psnr_vs_bicubic": 3.104748249053955,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 32.42635778018406,
+          "psnr_std": 3.686075668010032,
+          "ssim_mean": 0.9165908067090213,
+          "ssim_std": 0.0491947849105744,
+          "latency_ms": 74.43026428544337,
+          "delta_psnr_vs_bicubic": 2.118100438799175,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 31.39065840244293,
+          "psnr_std": 3.968026545341701,
+          "ssim_mean": 0.900035940892545,
+          "ssim_std": 0.05751736717642447,
+          "latency_ms": 49.13975199986453,
+          "delta_psnr_vs_bicubic": 1.8435020685195909,
+          "n_images": 100
+        }
+      }
+    },
+    "E13": {
+      "name": "E13_FSRCNN_4x_Charbonnier",
+      "model_type": "fsrcnn",
+      "scale": 4,
+      "loss": "charbonnier",
+      "group": "phase3",
+      "params": 24683,
+      "checkpoint": "outputs/checkpoints/phase3/E13_fsrcnn_4x_best.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 29.05707025527954,
+          "psnr_std": 3.60328251523706,
+          "ssim_mean": 0.8385136336620634,
+          "ssim_std": 0.04998469602397112,
+          "latency_ms": 9.357659999659518,
+          "delta_psnr_vs_bicubic": 0.6376891136169434,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 26.516686337334768,
+          "psnr_std": 3.1076679858794525,
+          "ssim_mean": 0.7458634277506521,
+          "ssim_std": 0.11023778041110995,
+          "latency_ms": 7.199935714587419,
+          "delta_psnr_vs_bicubic": 0.4336847577776233,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 26.35509898662567,
+          "psnr_std": 3.2620193291980626,
+          "ssim_mean": 0.7137508519639242,
+          "ssim_std": 0.11529952193489432,
+          "latency_ms": 2.3447020000457997,
+          "delta_psnr_vs_bicubic": 0.3992136240005486,
+          "n_images": 100
+        }
+      }
+    },
+    "E14": {
+      "name": "E14_EDSR_4x_L1",
+      "model_type": "edsr",
+      "scale": 4,
+      "loss": "l1",
+      "group": "phase3",
+      "params": 1517571,
+      "checkpoint": "outputs/checkpoints/phase3/E14_edsr_4x_best.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 30.700347900390625,
+          "psnr_std": 2.886711498085092,
+          "ssim_mean": 0.8808875410599158,
+          "ssim_std": 0.041839584452303936,
+          "latency_ms": 19.456779998290585,
+          "delta_psnr_vs_bicubic": 2.2809667587280273,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 27.631870337894984,
+          "psnr_std": 3.458011727268378,
+          "ssim_mean": 0.7751742638702404,
+          "ssim_std": 0.11646135856734283,
+          "latency_ms": 31.30571428638567,
+          "delta_psnr_vs_bicubic": 1.5488687583378393,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 26.986622476577757,
+          "psnr_std": 3.5269749725973676,
+          "ssim_mean": 0.7352335309977507,
+          "ssim_std": 0.1161351673317312,
+          "latency_ms": 19.75919000022259,
+          "delta_psnr_vs_bicubic": 1.030737113952636,
+          "n_images": 100
+        }
+      }
+    },
+    "E1": {
+      "name": "E1_SRCNN_2x_MSE",
+      "model_type": "srcnn",
+      "scale": 2,
+      "loss": "mse",
+      "group": "legacy",
+      "params": 20099,
+      "checkpoint": "outputs/checkpoints/srcnn_2x_mse.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 28.845776081085205,
+          "psnr_std": 1.979893355969727,
+          "ssim_mean": 0.9043514953089096,
+          "ssim_std": 0.034224382030535995,
+          "latency_ms": 66.50121999991825,
+          "delta_psnr_vs_bicubic": -4.794822692871094,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 27.340829372406006,
+          "psnr_std": 3.098970792177775,
+          "ssim_mean": 0.8527419607506167,
+          "ssim_std": 0.06139397308871111,
+          "latency_ms": 39.86140714265015,
+          "delta_psnr_vs_bicubic": -2.967427968978882,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 26.717143392562868,
+          "psnr_std": 2.525933657339452,
+          "ssim_mean": 0.8342499807132993,
+          "ssim_std": 0.0713778891739134,
+          "latency_ms": 25.28818999970099,
+          "delta_psnr_vs_bicubic": -2.830012941360472,
+          "n_images": 100
+        }
+      }
+    },
+    "E2": {
+      "name": "E2_SRCNN_2x_Perceptual",
+      "model_type": "srcnn",
+      "scale": 2,
+      "loss": "mse_perceptual",
+      "group": "legacy",
+      "params": 20099,
+      "checkpoint": "outputs/checkpoints/srcnn_2x_mse_perceptual.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 27.25127363204956,
+          "psnr_std": 2.7840340710907063,
+          "ssim_mean": 0.928509243611433,
+          "ssim_std": 0.03173640900603106,
+          "latency_ms": 19.04943999979878,
+          "delta_psnr_vs_bicubic": -6.389325141906738,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 26.304663249424525,
+          "psnr_std": 3.1217867569041875,
+          "ssim_mean": 0.8768651735543972,
+          "ssim_std": 0.04968245168399833,
+          "latency_ms": 39.95860714219037,
+          "delta_psnr_vs_bicubic": -4.0035940919603625,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 25.955838441848755,
+          "psnr_std": 2.7514321365104206,
+          "ssim_mean": 0.8621158353914639,
+          "ssim_std": 0.06582371392438441,
+          "latency_ms": 25.761537999969732,
+          "delta_psnr_vs_bicubic": -3.591317892074585,
+          "n_images": 100
+        }
+      }
+    },
+    "E3": {
+      "name": "E3_SRCNN_4x_MSE",
+      "model_type": "srcnn",
+      "scale": 4,
+      "loss": "mse",
+      "group": "legacy",
+      "params": 20099,
+      "checkpoint": "outputs/checkpoints/srcnn_4x_mse.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 26.304611682891846,
+          "psnr_std": 2.7363949226996493,
+          "ssim_mean": 0.8170140227540446,
+          "ssim_std": 0.05165622596242843,
+          "latency_ms": 17.76640000025509,
+          "delta_psnr_vs_bicubic": -2.114769458770752,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 24.57744368485042,
+          "psnr_std": 2.666486431622427,
+          "ssim_mean": 0.7221872937892025,
+          "ssim_std": 0.11246342372070472,
+          "latency_ms": 38.76952857172,
+          "delta_psnr_vs_bicubic": -1.505557894706726,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 24.545559525489807,
+          "psnr_std": 2.493470899447501,
+          "ssim_mean": 0.6903184171851889,
+          "ssim_std": 0.117273497739013,
+          "latency_ms": 25.42169999993348,
+          "delta_psnr_vs_bicubic": -1.4103258371353142,
+          "n_images": 100
+        }
+      }
+    },
+    "E4": {
+      "name": "E4_SRCNN_4x_Perceptual",
+      "model_type": "srcnn",
+      "scale": 4,
+      "loss": "mse_perceptual",
+      "group": "legacy",
+      "params": 20099,
+      "checkpoint": "outputs/checkpoints/srcnn_4x_mse_perceptual.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 23.296327590942383,
+          "psnr_std": 2.5387648808252044,
+          "ssim_mean": 0.7707685230193052,
+          "ssim_std": 0.05081281530085402,
+          "latency_ms": 19.373199999245116,
+          "delta_psnr_vs_bicubic": -5.123053550720215,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 22.56699366228921,
+          "psnr_std": 2.4885306167785286,
+          "ssim_mean": 0.6662670947953414,
+          "ssim_std": 0.1271666754555195,
+          "latency_ms": 36.75448571422229,
+          "delta_psnr_vs_bicubic": -3.5160079172679346,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 23.077273905277252,
+          "psnr_std": 2.72686327304374,
+          "ssim_mean": 0.6406025034339831,
+          "ssim_std": 0.13260740867266757,
+          "latency_ms": 25.76699599980202,
+          "delta_psnr_vs_bicubic": -2.878611457347869,
+          "n_images": 100
+        }
+      }
+    },
+    "E6": {
+      "name": "E6_ESPCN_2x_Perceptual",
+      "model_type": "espcn",
+      "scale": 2,
+      "loss": "mse_perceptual",
+      "group": "legacy",
+      "params": 48716,
+      "checkpoint": "outputs/checkpoints/espcn_2x_mse_perceptual.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 31.997117042541504,
+          "psnr_std": 2.7601240202901245,
+          "ssim_mean": 0.9037575335511973,
+          "ssim_std": 0.02907598978741747,
+          "latency_ms": 2.878579998650821,
+          "delta_psnr_vs_bicubic": -1.643481731414795,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 29.35561776161194,
+          "psnr_std": 2.9214626296978286,
+          "ssim_mean": 0.8491729609294508,
+          "ssim_std": 0.056037159524807305,
+          "latency_ms": 4.55074285725589,
+          "delta_psnr_vs_bicubic": -0.9526395797729492,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 28.952645897865295,
+          "psnr_std": 3.20927976282876,
+          "ssim_mean": 0.8352012235839031,
+          "ssim_std": 0.06928136611389236,
+          "latency_ms": 3.311108999805583,
+          "delta_psnr_vs_bicubic": -0.5945104360580444,
+          "n_images": 100
+        }
+      }
+    },
+    "E7": {
+      "name": "E7_ESPCN_4x_MSE",
+      "model_type": "espcn",
+      "scale": 4,
+      "loss": "mse",
+      "group": "legacy",
+      "params": 69488,
+      "checkpoint": "outputs/checkpoints/espcn_4x_mse.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 27.15207052230835,
+          "psnr_std": 3.497787438636445,
+          "ssim_mean": 0.7881627960850947,
+          "ssim_std": 0.04707904110051783,
+          "latency_ms": 8.047500000247965,
+          "delta_psnr_vs_bicubic": -1.267310619354248,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 25.070119074412755,
+          "psnr_std": 2.8746540733941783,
+          "ssim_mean": 0.6908302030972188,
+          "ssim_std": 0.12481279234615311,
+          "latency_ms": 5.346464286049013,
+          "delta_psnr_vs_bicubic": -1.0128825051443897,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 25.113372957706453,
+          "psnr_std": 2.915734941821733,
+          "ssim_mean": 0.6562982357729663,
+          "ssim_std": 0.12963133391108672,
+          "latency_ms": 1.7727949998516124,
+          "delta_psnr_vs_bicubic": -0.8425124049186685,
+          "n_images": 100
+        }
+      }
+    },
+    "E8": {
+      "name": "E8_ESPCN_4x_Perceptual",
+      "model_type": "espcn",
+      "scale": 4,
+      "loss": "mse_perceptual",
+      "group": "legacy",
+      "params": 69488,
+      "checkpoint": "outputs/checkpoints/espcn_4x_mse_perceptual.pt",
+      "metrics": {
+        "Set5": {
+          "psnr_mean": 25.33259415626526,
+          "psnr_std": 3.162305083476617,
+          "ssim_mean": 0.7417319761023566,
+          "ssim_std": 0.04675315742975918,
+          "latency_ms": 1.900799999566516,
+          "delta_psnr_vs_bicubic": -3.086786985397339,
+          "n_images": 5
+        },
+        "Set14": {
+          "psnr_mean": 24.070531129837036,
+          "psnr_std": 2.451981715822856,
+          "ssim_mean": 0.6431649796075934,
+          "ssim_std": 0.12598483083303996,
+          "latency_ms": 2.3991785723670285,
+          "delta_psnr_vs_bicubic": -2.0124704497201087,
+          "n_images": 14
+        },
+        "BSD100": {
+          "psnr_mean": 24.434020698070526,
+          "psnr_std": 2.793909047882386,
+          "ssim_mean": 0.6127405001183331,
+          "ssim_std": 0.12918892713478405,
+          "latency_ms": 1.6199590000178432,
+          "delta_psnr_vs_bicubic": -1.5218646645545952,
+          "n_images": 100
+        }
+      }
+    }
+  }
+}

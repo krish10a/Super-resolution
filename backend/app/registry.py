@@ -21,6 +21,8 @@ import torch
 
 from models.srcnn import SRCNN
 from models.espcn import ESPCN
+from models.fsrcnn import FSRCNN
+from models.edsr import EDSR
 
 # ---------------------------------------------------------------------------
 # Project-root-relative paths (this file lives at backend/app/registry.py)
@@ -31,16 +33,23 @@ CHECKPOINTS_DIR = PROJECT_ROOT / "outputs" / "checkpoints"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # ---------------------------------------------------------------------------
-# Model definitions (E1-E8). Checkpoint filenames match evaluate_all.py.
+# Model definitions (Legacy E1-E8 + Phase 3 E9-E14)
 # ---------------------------------------------------------------------------
 # id -> (architecture, scale, loss, checkpoint filename)
 _MODEL_SPECS = {
-    # SRCNN
+    # Phase 3 DIV2K Models (Recommended)
+    "edsr_2x_l1": ("edsr", 2, "l1", "phase3/E11_edsr_2x_best.pt"),
+    "edsr_4x_l1": ("edsr", 4, "l1", "phase3/E14_edsr_4x_best.pt"),
+    "espcn_2x_charbonnier": ("espcn", 2, "charbonnier", "phase3/E9_espcn_2x_best.pt"),
+    "espcn_4x_charbonnier": ("espcn", 4, "charbonnier", "phase3/E12_espcn_4x_best.pt"),
+    "fsrcnn_2x_charbonnier": ("fsrcnn", 2, "charbonnier", "phase3/E10_fsrcnn_2x_best.pt"),
+    "fsrcnn_4x_charbonnier": ("fsrcnn", 4, "charbonnier", "phase3/E13_fsrcnn_4x_best.pt"),
+
+    # Legacy E1-E8 Models (Preserved for Historical Comparison)
     "srcnn_2x_mse": ("srcnn", 2, "mse", "srcnn_2x_mse.pt"),
     "srcnn_2x_mse_perceptual": ("srcnn", 2, "mse_perceptual", "srcnn_2x_mse_perceptual.pt"),
     "srcnn_4x_mse": ("srcnn", 4, "mse", "srcnn_4x_mse.pt"),
     "srcnn_4x_mse_perceptual": ("srcnn", 4, "mse_perceptual", "srcnn_4x_mse_perceptual.pt"),
-    # ESPCN
     "espcn_2x_mse": ("espcn", 2, "mse", "espcn_2x_mse.pt"),
     "espcn_2x_mse_perceptual": ("espcn", 2, "mse_perceptual", "espcn_2x_mse_perceptual.pt"),
     "espcn_4x_mse": ("espcn", 4, "mse", "espcn_4x_mse.pt"),
@@ -51,12 +60,16 @@ _MODEL_SPECS = {
 _ARCH_DISPLAY = {
     "srcnn": "SRCNN",
     "espcn": "ESPCN",
+    "fsrcnn": "FSRCNN",
+    "edsr": "EDSR-Baseline",
 }
 
 # Loss -> display name
 _LOSS_DISPLAY = {
     "mse": "MSE",
     "mse_perceptual": "MSE + Perceptual",
+    "charbonnier": "Charbonnier",
+    "l1": "L1",
 }
 
 
@@ -113,11 +126,16 @@ class ModelRegistry:
             )
 
     # ------------------------------------------------------------------ loading
-    def _instantiate(self, arch: str, scale: int) -> torch.nn.Module:
+    def _instantiate(self, arch: str, scale: int, model_id: str = "") -> torch.nn.Module:
         if arch == "srcnn":
             return SRCNN()
         if arch == "espcn":
-            return ESPCN(scale=scale)
+            mid_ch = 32 if "charbonnier" in model_id else 64
+            return ESPCN(scale=scale, mid_channels=mid_ch)
+        if arch == "fsrcnn":
+            return FSRCNN(scale=scale)
+        if arch == "edsr":
+            return EDSR(scale=scale, n_feats=64, n_resblocks=16)
         raise ValueError(f"Unknown architecture: {arch}")
 
     def load_model(self, model_id: str) -> torch.nn.Module:
@@ -141,8 +159,10 @@ class ModelRegistry:
             raise RuntimeError(msg)
 
         try:
-            model = self._instantiate(info.architecture, info.scale)
+            model = self._instantiate(info.architecture, info.scale, model_id=model_id)
             state = torch.load(info.checkpoint_path, map_location=self.device)
+            if isinstance(state, dict) and "model_state_dict" in state:
+                state = state["model_state_dict"]
             # Strict load: architecture must match checkpoint exactly.
             model.load_state_dict(state, strict=True)
             model.to(self.device)

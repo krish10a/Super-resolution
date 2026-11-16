@@ -40,6 +40,8 @@ backend/test_bad.txt
 # ===========================================================================
 # Datasets & Heavy Binary Images (Reproducible via data scripts)
 # ===========================================================================
+datasets/
+data/processed/
 data/raw/**/*
 data/pairs/**/*
 data/pairs_clean/**/*
@@ -70,9 +72,12 @@ checkpoints/
 experiments/
 outputs/*
 !outputs/checkpoints/
-!outputs/checkpoints/*.pt
+!outputs/checkpoints/**/*.pt
+outputs/checkpoints/**/*_recovery.pt
 !outputs/evaluation/
 !outputs/evaluation/**/*
+!outputs/logs/
+!outputs/logs/**/*
 
 # ===========================================================================
 # External Templates, IDE & OS
