@@ -1,0 +1,390 @@
+{
+  "metric_parity_test": "project vs BasicSR",
+  "summary": {
+    "total_comparisons": 30,
+    "max_psnr_diff": 0.09639775932983596,
+    "mean_psnr_diff": 0.044595833581919445,
+    "max_ssim_diff": 0.03234676212272336,
+    "mean_ssim_diff": 0.007824184660602218
+  },
+  "results": [
+    {
+      "dataset": "Set5",
+      "scale": 2,
+      "project_impl": "metrics/psnr_ssim.py (BT.601 Y, shave=scale, skimage SSIM)",
+      "basicSR_impl": "basicsr_reference.py (BT.601 Y, crop=scale, cv2 SSIM)",
+      "per_image": [
+        {
+          "image": "Set5_00",
+          "project_psnr": 31.338467597961426,
+          "project_ssim": 0.9554412356334121,
+          "basicSR_psnr": 31.251277579744755,
+          "basicSR_ssim": 0.9560100067595213,
+          "psnr_diff": 0.0871900182166705,
+          "ssim_diff": 0.0005687711261092021,
+          "hr_hash": "863e9eee9efa11cb5f1f8b8da90a25cd7a3cf23986467392c03743a194427865",
+          "lr_hash": "03370bd04f8ff09e58b7464688ee9fd7dec1d9dd32e8f1bde03bfe8704fdb061"
+        },
+        {
+          "image": "Set5_01",
+          "project_psnr": 29.887375831604004,
+          "project_ssim": 0.9514660441600559,
+          "basicSR_psnr": 29.98377359093384,
+          "basicSR_ssim": 0.9529694987925065,
+          "psnr_diff": 0.09639775932983596,
+          "ssim_diff": 0.001503454632450607,
+          "hr_hash": "82cd47975d1e1586da1babe94dc5b5cb522192b6b46a9c458f2924e459ddb15c",
+          "lr_hash": "1f006aad3e245cba784e8d7f1ab7589bf90bb7b4082fa5516504c600760f3ce2"
+        },
+        {
+          "image": "Set5_02",
+          "project_psnr": 30.80371379852295,
+          "project_ssim": 0.956134199420077,
+          "basicSR_psnr": 30.855895668654263,
+          "basicSR_ssim": 0.9587733461456468,
+          "psnr_diff": 0.0521818701313137,
+          "ssim_diff": 0.002639146725569752,
+          "hr_hash": "a4b9066c797e3588f7251d5703fb9de514dba13e13907e488980d915d9c7c8e7",
+          "lr_hash": "46f60e852d3d81e5eeac1314bf12aa1c6a55b2f4f976aa4f6f44187038bbd955"
+        },
+        {
+          "image": "Set5_03",
+          "project_psnr": 28.38567018508911,
+          "project_ssim": 0.9448421996754238,
+          "basicSR_psnr": 28.46458957838616,
+          "basicSR_ssim": 0.9472985752336808,
+          "psnr_diff": 0.07891939329704911,
+          "ssim_diff": 0.0024563755582569513,
+          "hr_hash": "c4e2f891877f5956a0ab345e079190674c760a77aa88039db608a9a86f72355c",
+          "lr_hash": "bba5d1a637cefa88768a3b4d52d4aeac81520fb89627b4f8a2fbf02428d910c5"
+        },
+        {
+          "image": "Set5_04",
+          "project_psnr": 27.225918769836426,
+          "project_ssim": 0.9472429694704669,
+          "basicSR_psnr": 27.24371968473357,
+          "basicSR_ssim": 0.9494914391412383,
+          "psnr_diff": 0.017800914897144082,
+          "ssim_diff": 0.0022484696707714136,
+          "hr_hash": "02587a85dbee5f958b784f1cef0473bc7c7311d172a5349c13eb1d36af2552da",
+          "lr_hash": "01d274d575683118f46f3f81d40f53c4f2a3879e3635d027d7c56d8302072906"
+        }
+      ]
+    },
+    {
+      "dataset": "Set5",
+      "scale": 4,
+      "project_impl": "metrics/psnr_ssim.py (BT.601 Y, shave=scale, skimage SSIM)",
+      "basicSR_impl": "basicsr_reference.py (BT.601 Y, crop=scale, cv2 SSIM)",
+      "per_image": [
+        {
+          "image": "Set5_00",
+          "project_psnr": 28.792293071746826,
+          "project_ssim": 0.9066052487482944,
+          "basicSR_psnr": 28.76001498619098,
+          "basicSR_ssim": 0.9087594864281885,
+          "psnr_diff": 0.03227808555584488,
+          "ssim_diff": 0.0021542376798940888,
+          "hr_hash": "863e9eee9efa11cb5f1f8b8da90a25cd7a3cf23986467392c03743a194427865",
+          "lr_hash": "e6546b159196986e88060a4b6513988d13e39e1501824e5d28bcd406bfefe855"
+        },
+        {
+          "image": "Set5_01",
+          "project_psnr": 27.24008560180664,
+          "project_ssim": 0.9000743638885275,
+          "basicSR_psnr": 27.335872661468237,
+          "basicSR_ssim": 0.9016141930925639,
+          "psnr_diff": 0.09578705966159617,
+          "ssim_diff": 0.0015398292040363915,
+          "hr_hash": "82cd47975d1e1586da1babe94dc5b5cb522192b6b46a9c458f2924e459ddb15c",
+          "lr_hash": "49d5602e29819e4873570679a6d74989c1e48835264766714edeac0841cf9936"
+        },
+        {
+          "image": "Set5_02",
+          "project_psnr": 28.46825122833252,
+          "project_ssim": 0.9148589080221778,
+          "basicSR_psnr": 28.51299646134261,
+          "basicSR_ssim": 0.9202533674494976,
+          "psnr_diff": 0.044745233010090146,
+          "ssim_diff": 0.005394459427319753,
+          "hr_hash": "a4b9066c797e3588f7251d5703fb9de514dba13e13907e488980d915d9c7c8e7",
+          "lr_hash": "7e6ef7d919db91132bd1a00f986768b3f34164eab89a66fdb7db817faed85402"
+        },
+        {
+          "image": "Set5_03",
+          "project_psnr": 25.886757373809814,
+          "project_ssim": 0.8882549345249482,
+          "basicSR_psnr": 25.957449996607505,
+          "basicSR_ssim": 0.8911961638587479,
+          "psnr_diff": 0.07069262279769006,
+          "ssim_diff": 0.0029412293337996998,
+          "hr_hash": "c4e2f891877f5956a0ab345e079190674c760a77aa88039db608a9a86f72355c",
+          "lr_hash": "7958a5a8cb353b3d82f742afb4bb7bf66d9101cde8f4458a344548a9ea1a3c92"
+        },
+        {
+          "image": "Set5_04",
+          "project_psnr": 24.787395000457764,
+          "project_ssim": 0.895659778404835,
+          "basicSR_psnr": 24.809094195143196,
+          "basicSR_ssim": 0.8982933788699521,
+          "psnr_diff": 0.021699194685432133,
+          "ssim_diff": 0.0026336004651170697,
+          "hr_hash": "02587a85dbee5f958b784f1cef0473bc7c7311d172a5349c13eb1d36af2552da",
+          "lr_hash": "f648507b0dc447f5d247edf442575209f194cadb845c26352a30ccca06cc05c2"
+        }
+      ]
+    },
+    {
+      "dataset": "Set14",
+      "scale": 2,
+      "project_impl": "metrics/psnr_ssim.py (BT.601 Y, shave=scale, skimage SSIM)",
+      "basicSR_impl": "basicsr_reference.py (BT.601 Y, crop=scale, cv2 SSIM)",
+      "per_image": [
+        {
+          "image": "Set14_00",
+          "project_psnr": 30.97280979156494,
+          "project_ssim": 0.9549886410401115,
+          "basicSR_psnr": 31.03363620214975,
+          "basicSR_ssim": 0.9563011488279445,
+          "psnr_diff": 0.06082641058480931,
+          "ssim_diff": 0.0013125077878329838,
+          "hr_hash": "b2f703e86d53348aee59275bfb32a7e67b1dfba1945679137852abd27292b656",
+          "lr_hash": "beda9274f3097144f63e880d618beda8d135a544947dec84dae7c2616dd6590f"
+        },
+        {
+          "image": "Set14_01",
+          "project_psnr": 29.530317783355713,
+          "project_ssim": 0.9477634757856929,
+          "basicSR_psnr": 29.603174940807698,
+          "basicSR_ssim": 0.9500199661418298,
+          "psnr_diff": 0.07285715745198473,
+          "ssim_diff": 0.002256490356136953,
+          "hr_hash": "4c26d3dc7c7590e6ff573504b1247af0b37eb95fdb200e144818a2ed78d0a574",
+          "lr_hash": "1c017ec07b751ec9e70152de319abd8a0606a7b34c68d1641b3c9d1d3e6da627"
+        },
+        {
+          "image": "Set14_02",
+          "project_psnr": 27.044360637664795,
+          "project_ssim": 0.9522091925282103,
+          "basicSR_psnr": 27.09270968717157,
+          "basicSR_ssim": 0.9520200916079354,
+          "psnr_diff": 0.04834904950677554,
+          "ssim_diff": 0.00018910092027490943,
+          "hr_hash": "4f6bf15922ad77de30e8672f4649df73d6bd23d8531bef8e967b6b57cb94c422",
+          "lr_hash": "91193c8c51847b22b7b8ec8584846ab6b53e9acc36a92199df0193696b679750"
+        },
+        {
+          "image": "Set14_03",
+          "project_psnr": 29.650700092315674,
+          "project_ssim": 0.9489383803988796,
+          "basicSR_psnr": 29.724401856343796,
+          "basicSR_ssim": 0.9502531699979152,
+          "psnr_diff": 0.07370176402812234,
+          "ssim_diff": 0.0013147895990356373,
+          "hr_hash": "bcaf0ddfe71de51d286e814cbffe9fdcc753ccd01408ac371246cf76a4384362",
+          "lr_hash": "aca0c25bc0daeb89be480158fdf922320e30e127b3f720ae17c851275f79af1d"
+        },
+        {
+          "image": "Set14_04",
+          "project_psnr": 31.62428379058838,
+          "project_ssim": 0.9535793264683181,
+          "basicSR_psnr": 31.71838656339411,
+          "basicSR_ssim": 0.9564397830225977,
+          "psnr_diff": 0.09410277280572998,
+          "ssim_diff": 0.002860456554279578,
+          "hr_hash": "411695c8d17cb3f203042f85f739d2f6b40e1d4da44a29e212a63de22b90ca9f",
+          "lr_hash": "455cae17e3f583b5633fe0feb476e4fd597c60ac83c55a186d40a9133ba383a5"
+        }
+      ]
+    },
+    {
+      "dataset": "Set14",
+      "scale": 4,
+      "project_impl": "metrics/psnr_ssim.py (BT.601 Y, shave=scale, skimage SSIM)",
+      "basicSR_impl": "basicsr_reference.py (BT.601 Y, crop=scale, cv2 SSIM)",
+      "per_image": [
+        {
+          "image": "Set14_00",
+          "project_psnr": 28.208565711975098,
+          "project_ssim": 0.9037093594406322,
+          "basicSR_psnr": 28.25480501209034,
+          "basicSR_ssim": 0.9063167288625773,
+          "psnr_diff": 0.0462393001152428,
+          "ssim_diff": 0.0026073694219450605,
+          "hr_hash": "b2f703e86d53348aee59275bfb32a7e67b1dfba1945679137852abd27292b656",
+          "lr_hash": "424b70933030baf8486a2e2c0f51ec42de16506538fa338fe66eb96120f100ca"
+        },
+        {
+          "image": "Set14_01",
+          "project_psnr": 26.957721710205078,
+          "project_ssim": 0.8934779338187606,
+          "basicSR_psnr": 27.018009237608815,
+          "basicSR_ssim": 0.8952878480423886,
+          "psnr_diff": 0.06028752740373733,
+          "ssim_diff": 0.001809914223627973,
+          "hr_hash": "4c26d3dc7c7590e6ff573504b1247af0b37eb95fdb200e144818a2ed78d0a574",
+          "lr_hash": "190200d090f31ec0edf0cbb35b265fa50290cf6f2d9573852191ce012e2d2d31"
+        },
+        {
+          "image": "Set14_02",
+          "project_psnr": 24.39781427383423,
+          "project_ssim": 0.8988657749431924,
+          "basicSR_psnr": 24.444960207788284,
+          "basicSR_ssim": 0.9006180574556697,
+          "psnr_diff": 0.04714593395405586,
+          "ssim_diff": 0.0017522825124772767,
+          "hr_hash": "4f6bf15922ad77de30e8672f4649df73d6bd23d8531bef8e967b6b57cb94c422",
+          "lr_hash": "259c6c95e8bf85b5867600049b618b1eea0d3a162976195c99fc0044732ee9f9"
+        },
+        {
+          "image": "Set14_03",
+          "project_psnr": 27.17949628829956,
+          "project_ssim": 0.8961376353433409,
+          "basicSR_psnr": 27.2522835524426,
+          "basicSR_ssim": 0.8981193438513859,
+          "psnr_diff": 0.07278726414303804,
+          "ssim_diff": 0.0019817085080450214,
+          "hr_hash": "bcaf0ddfe71de51d286e814cbffe9fdcc753ccd01408ac371246cf76a4384362",
+          "lr_hash": "ee64d713c9c7cc91c670d61d14d394d5283ec1aa037436f205816247b54d11f5"
+        },
+        {
+          "image": "Set14_04",
+          "project_psnr": 29.26704168319702,
+          "project_ssim": 0.9111609714391061,
+          "basicSR_psnr": 29.34929731670611,
+          "basicSR_ssim": 0.9169797230028583,
+          "psnr_diff": 0.08225563350908871,
+          "ssim_diff": 0.0058187515637522225,
+          "hr_hash": "411695c8d17cb3f203042f85f739d2f6b40e1d4da44a29e212a63de22b90ca9f",
+          "lr_hash": "ab59cad3735e8a3bf144b77146f9b624326fab6ab8113ac9308d7ee3d437e7b4"
+        }
+      ]
+    },
+    {
+      "dataset": "BSD100",
+      "scale": 2,
+      "project_impl": "metrics/psnr_ssim.py (BT.601 Y, shave=scale, skimage SSIM)",
+      "basicSR_impl": "basicsr_reference.py (BT.601 Y, crop=scale, cv2 SSIM)",
+      "per_image": [
+        {
+          "image": "img_001",
+          "project_psnr": 25.846998691558838,
+          "project_ssim": 0.7511633526604419,
+          "basicSR_psnr": 25.84303943678135,
+          "basicSR_ssim": 0.7251208880843832,
+          "psnr_diff": 0.0039592547774880416,
+          "ssim_diff": 0.026042464576058633,
+          "hr_hash": "71db312585435c0da64be0559f2025f21cf685ce61c54cfdfe2167eeec92f58e",
+          "lr_hash": "af350c2bfc56010d59b1701f15afd8a407e7c5b4bebb42055f9dc24e40f6c835"
+        },
+        {
+          "image": "img_002",
+          "project_psnr": 30.47370433807373,
+          "project_ssim": 0.8942348603043848,
+          "basicSR_psnr": 30.46095172124034,
+          "basicSR_ssim": 0.882566279846962,
+          "psnr_diff": 0.012752616833392239,
+          "ssim_diff": 0.011668580457422806,
+          "hr_hash": "72a87fa3dd20e8a37cd5982fef2c97d87d5a24576366b75061670defcd4152f2",
+          "lr_hash": "3a1d5d3c05a556bfcff6e5ecea0088a8e930e0c55c15d389ea41dd6c0a6a5f49"
+        },
+        {
+          "image": "img_003",
+          "project_psnr": 27.973110675811768,
+          "project_ssim": 0.880677357191086,
+          "basicSR_psnr": 27.967039170276635,
+          "basicSR_ssim": 0.8680469070815899,
+          "psnr_diff": 0.00607150553513236,
+          "ssim_diff": 0.012630450109496039,
+          "hr_hash": "5614d084a313fdedbe12c8acc7abfc2908dd2fb4568efa2e81303ee001959603",
+          "lr_hash": "c59a89690a5b2f986c849516c911bec0fa14f14bb2e7456c8227bddb0ed13570"
+        },
+        {
+          "image": "img_004",
+          "project_psnr": 33.01651954650879,
+          "project_ssim": 0.9349399046213005,
+          "basicSR_psnr": 32.994871768856136,
+          "basicSR_ssim": 0.925816880348216,
+          "psnr_diff": 0.021647777652653133,
+          "ssim_diff": 0.009123024273084535,
+          "hr_hash": "3d8869df89a4299901605dc2a40c394d5b5a80f390b20c0e7dae726b755cfd79",
+          "lr_hash": "4ada7510b08c659ae129479bedb1956efc144cc256904e34187df3457c6a68ec"
+        },
+        {
+          "image": "img_005",
+          "project_psnr": 28.674070835113525,
+          "project_ssim": 0.8625833612613472,
+          "basicSR_psnr": 28.665311470715125,
+          "basicSR_ssim": 0.841958304426281,
+          "psnr_diff": 0.008759364398400749,
+          "ssim_diff": 0.020625056835066213,
+          "hr_hash": "82bb92a8d6aadd1a96b4192ee3d3c36e69e57441800f5ce7c6c5382b7457c517",
+          "lr_hash": "d1ea0f02d2e4165fad4138548401de5d7f33d3650373b23a72bf87b5b310b8f9"
+        }
+      ]
+    },
+    {
+      "dataset": "BSD100",
+      "scale": 4,
+      "project_impl": "metrics/psnr_ssim.py (BT.601 Y, shave=scale, skimage SSIM)",
+      "basicSR_impl": "basicsr_reference.py (BT.601 Y, crop=scale, cv2 SSIM)",
+      "per_image": [
+        {
+          "image": "img_001",
+          "project_psnr": 23.18206548690796,
+          "project_ssim": 0.534571408641731,
+          "basicSR_psnr": 23.17818299788766,
+          "basicSR_ssim": 0.5022246465190077,
+          "psnr_diff": 0.0038824890202988627,
+          "ssim_diff": 0.03234676212272336,
+          "hr_hash": "71db312585435c0da64be0559f2025f21cf685ce61c54cfdfe2167eeec92f58e",
+          "lr_hash": "64ac197eebb38aa35dadcdce91bb93cab42455fd0cd0405e9894e63f82ed9cf5"
+        },
+        {
+          "image": "img_002",
+          "project_psnr": 26.986756324768066,
+          "project_ssim": 0.7703527724100749,
+          "basicSR_psnr": 26.97986488066538,
+          "basicSR_ssim": 0.7546936911036207,
+          "psnr_diff": 0.006891444102684829,
+          "ssim_diff": 0.015659081306454214,
+          "hr_hash": "72a87fa3dd20e8a37cd5982fef2c97d87d5a24576366b75061670defcd4152f2",
+          "lr_hash": "329425f0193d2a5c6f971874c24211a131118e254cff23e76e915d6a405eae4b"
+        },
+        {
+          "image": "img_003",
+          "project_psnr": 24.958813190460205,
+          "project_ssim": 0.7614453510380561,
+          "basicSR_psnr": 24.954949444209767,
+          "basicSR_ssim": 0.7439487983202758,
+          "psnr_diff": 0.0038637462504382825,
+          "ssim_diff": 0.017496552717780278,
+          "hr_hash": "5614d084a313fdedbe12c8acc7abfc2908dd2fb4568efa2e81303ee001959603",
+          "lr_hash": "f2e38e13a6b6061e817e4f339516d89b9c4982b058de31b06ff3b6034e3d4ed4"
+        },
+        {
+          "image": "img_004",
+          "project_psnr": 29.078316688537598,
+          "project_ssim": 0.8079834228951015,
+          "basicSR_psnr": 29.0688937799656,
+          "basicSR_ssim": 0.7941528920192101,
+          "psnr_diff": 0.00942290857199879,
+          "ssim_diff": 0.013830530875891367,
+          "hr_hash": "3d8869df89a4299901605dc2a40c394d5b5a80f390b20c0e7dae726b755cfd79",
+          "lr_hash": "613faa7164338e5cd50660af4066f32a74cb29e7439d7a2f17f1ebf5ab1cf728"
+        },
+        {
+          "image": "img_005",
+          "project_psnr": 25.349252223968506,
+          "project_ssim": 0.6771732628998781,
+          "basicSR_psnr": 25.34487328873866,
+          "basicSR_ssim": 0.6478531716265216,
+          "psnr_diff": 0.0043789352298446715,
+          "ssim_diff": 0.029320091273356552,
+          "hr_hash": "82bb92a8d6aadd1a96b4192ee3d3c36e69e57441800f5ce7c6c5382b7457c517",
+          "lr_hash": "d47e15a29e82a2bc6bfcda005e05d5129dfe58678d7e0c29a1864de1847ed441"
+        }
+      ]
+    }
+  ]
+}

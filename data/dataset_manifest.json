@@ -1,1 +1,37 @@
-{\ Set5_real\:{\source\:\https://raw.githubusercontent.com/linzino7/Set5-dataset/main/Set5/HR/\,\download_date\:\2026-10-31\,\license\:\Research use\}}
+{
+  "Set5": {
+    "source": "https://raw.githubusercontent.com/linzino7/Set5-dataset/main/Set5/HR/",
+    "download_date": "2026-10-31",
+    "license": "Research and Academic Benchmark Use",
+    "format": "PNG",
+    "count": 5
+  },
+  "Set14": {
+    "source": "https://raw.githubusercontent.com/jbhuang0604/SelfExSR/master/data/Set14",
+    "download_date": "2026-11-01",
+    "license": "Research and Academic Benchmark Use",
+    "format": "PNG",
+    "count": 14
+  },
+  "BSD100": {
+    "source": "https://raw.githubusercontent.com/jbhuang0604/SelfExSR/master/data/B100",
+    "download_date": "2026-11-01",
+    "license": "BSD / Research Use",
+    "format": "PNG",
+    "count": 100
+  },
+  "DIV2K": {
+    "source": "https://data.vision.ee.ethz.ch/cvl/DIV2K/",
+    "download_date": "2026-11-01",
+    "license": "Educational and Research Use",
+    "format": "PNG",
+    "count": 800
+  },
+  "T91": {
+    "source": "https://raw.githubusercontent.com/whu-cv/SISR-Datasets/master/T91",
+    "download_date": "2026-11-01",
+    "license": "Research Use (Timofte et al.)",
+    "format": "PNG",
+    "count": 91
+  }
+}

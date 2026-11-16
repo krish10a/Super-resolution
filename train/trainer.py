@@ -16,7 +16,7 @@ class Trainer:
         for i, (lr, hr) in enumerate(tqdm(loader)):
             lr, hr = lr.to(self.device), hr.to(self.device)
             if self.scaler:
-                with torch.cuda.amp.autocast():
+                with torch.amp.autocast('cuda'):
                     out = self.model(lr)
                     loss = self.loss_fn(out, hr) / grad_accum
                 self.scaler.scale(loss).backward()

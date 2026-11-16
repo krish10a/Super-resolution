@@ -85,6 +85,9 @@ def main():
                 _, x = preprocess_frame(frame, args.model_type, args.scale)
                 x = x.to(args.device)
                 out = model(x)
+                # SRCNN ends in Tanh ([-1, 1]); map to [0, 1] for display.
+                if args.model_type == 'srcnn':
+                    out = (out + 1.0) / 2.0
                 sr = postprocess(out)
 
                 # Side-by-side: original frame (left) and SR output (right).

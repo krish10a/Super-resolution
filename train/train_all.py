@@ -1,6 +1,7 @@
 import argparse
 import os
 import sys
+import random
 import yaml
 import torch
 from torch.utils.data import DataLoader
@@ -15,7 +16,7 @@ from losses.mse_loss import MSELoss
 from losses.perceptual_loss import HybridLoss
 from train.trainer import Trainer
 from data.dataset import PatchDataset
-from metrics.psnr_ssim import compute_psnr_ssim, rgb_to_y
+from metrics.psnr_ssim import compute_psnr_ssim
 from PIL import Image
 import torchvision.transforms.functional as TTF
 import numpy as np
@@ -52,8 +53,8 @@ def bicubic_baseline(lr_dir, hr_dir, scale, device):
             continue
         lr = Image.open(lr_path).convert('RGB')
         hr = Image.open(hr_path).convert('RGB')
-        # bicubic upsample LR to HR size
-        lr_up = bicubic_upsample(lr, scale)
+        # bicubic upsample LR to exactly HR size
+        lr_up = lr.resize(hr.size, Image.BICUBIC)
         lr_t = TTF.to_tensor(lr_up).unsqueeze(0).to(device)
         hr_t = TTF.to_tensor(hr).unsqueeze(0).to(device)
         p, s = compute_psnr_ssim(lr_t.squeeze(0), hr_t.squeeze(0), scale=scale)
@@ -63,10 +64,38 @@ def bicubic_baseline(lr_dir, hr_dir, scale, device):
             sum(ssims) / len(ssims) if ssims else float('nan'))
 
 
+def split_train_val(hr_dir, val_split, seed=42):
+    """Split HR files in hr_dir into train/val basename sets."""
+    all_files = sorted([f for f in os.listdir(hr_dir)
+                        if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
+    random.seed(seed)
+    random.shuffle(all_files)
+    n_val = max(1, int(len(all_files) * val_split))
+    val_names = {os.path.splitext(f)[0] for f in all_files[:n_val]}
+    train_names = {os.path.splitext(f)[0] for f in all_files[n_val:]}
+    return train_names, val_names
+
+
 def main():
     parser = argparse.ArgumentParser(description='Train SISR experiment (E1-E8)')
     parser.add_argument('--config', required=True, help='Path to experiments YAML')
     parser.add_argument('--exp', required=True, help='Experiment id, e.g. E4')
+    parser.add_argument('--data-dir', default='data/pairs',
+                        help='Root directory containing dataset pairs (default: data/pairs)')
+    parser.add_argument('--val-split', type=float, default=0.0,
+                        help='Fraction of train_set HR images to hold out as validation (0.0 disables)')
+    parser.add_argument('--log-file', default=None,
+                        help='Append per-epoch logs to this file (default: none)')
+    parser.add_argument('--perc-warmup-epochs', type=int, default=0,
+                        help='For perceptual loss: MSE-only epochs before enabling hybrid (default: 0)')
+    parser.add_argument('--max-epochs', type=int, default=None,
+                        help='Override max_epochs from config (default: use config value)')
+    parser.add_argument('--patience', type=int, default=None,
+                        help='Override early_stop_patience from config (default: use config value)')
+    parser.add_argument('--no-early-stop', action='store_true',
+                        help='Disable early stopping and run the full max_epochs regardless of val PSNR')
+    parser.add_argument('--ckpt-tag', default=None,
+                        help='Optional tag appended to checkpoint filename (e.g. "verified") to avoid overwriting existing checkpoints')
     parser.add_argument('--degrade', action='store_true',
                         help='Generate LR from HR on the fly via degradation pipeline')
     parser.add_argument('--blur-ksize', type=int, default=5,
@@ -95,8 +124,8 @@ def main():
     lr = hp.get('lr', 1e-4)
     batch_size = hp.get('batch_size_local_mse', 4)
     grad_accum = hp.get('grad_accum_steps', 4)
-    max_epochs = hp.get('max_epochs', 200)
-    patience = hp.get('early_stop_patience', 15)
+    max_epochs = args.max_epochs if args.max_epochs is not None else hp.get('max_epochs', 200)
+    patience = args.patience if args.patience is not None else hp.get('early_stop_patience', 15)
     patch_size = hp.get(f'patch_lr_{scale}x', patch_size_for_scale(scale))
     perceptual_lambda = hp.get('perceptual_lambda', 0.07)
 
@@ -124,14 +153,17 @@ def main():
     if loss_name in ('mse', 'mse_loss'):
         loss_fn = MSELoss()
     elif loss_name in ('mse_perceptual', 'mse+perceptual', 'hybrid'):
-        loss_fn = HybridLoss(lambda_perc=perceptual_lambda)
+        # Start with lambda_perc=0 for warmup (MSE-only), enable after warmup epochs
+        loss_fn = HybridLoss(lambda_perc=0.0 if args.perc_warmup_epochs > 0 else perceptual_lambda)
     else:
         raise ValueError(f'Unknown loss: {loss_name}')
+
+    loss_fn = loss_fn.to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
     # --- Data ---
-    base = 'data/pairs'
+    base = args.data_dir
     train_hr = os.path.join(base, f'{train_set}_HR')
     val_lr = os.path.join(base, f'{test_set}_LR_x{scale}')
     val_hr = os.path.join(base, f'{test_set}_HR')
@@ -143,11 +175,28 @@ def main():
                 f'Data dir missing: {train_hr}\n'
                 f'Run: python data/download_sets.py && python data/prepare_pairs.py'
             )
-        train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
-                                patch_size=patch_size, upsample_lr=upsample_lr,
-                                degrade_on_the_fly=True,
-                                degradation_kwargs=degradation_kwargs)
-        print(f'Training with on-the-fly degradation from HR dir: {train_hr}')
+        if args.val_split > 0:
+            train_names, val_names = split_train_val(train_hr, args.val_split)
+            train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
+                                    patch_size=patch_size, upsample_lr=upsample_lr,
+                                    degrade_on_the_fly=True,
+                                    degradation_kwargs=degradation_kwargs,
+                                    file_names=train_names)
+            val_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
+                                  patch_size=patch_size, upsample_lr=upsample_lr,
+                                  degrade_on_the_fly=True,
+                                  degradation_kwargs=degradation_kwargs,
+                                  file_names=val_names)
+            print(f'Train/val split: {len(train_names)} train / {len(val_names)} val images '
+                  f'(from {train_set})')
+        else:
+            train_ds = PatchDataset(lr_dir=None, hr_dir=train_hr, scale=scale,
+                                    patch_size=patch_size, upsample_lr=upsample_lr,
+                                    degrade_on_the_fly=True,
+                                    degradation_kwargs=degradation_kwargs)
+            val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
+                                  upsample_lr=upsample_lr)
+            print(f'Training with on-the-fly degradation from HR dir: {train_hr}')
     else:
         train_lr = os.path.join(base, f'{train_set}_LR_x{scale}')
         for d in [train_lr, train_hr, val_lr, val_hr]:
@@ -156,11 +205,23 @@ def main():
                     f'Data dir missing: {d}\n'
                     f'Run: python data/download_sets.py && python data/prepare_pairs.py'
                 )
-        train_ds = PatchDataset(train_lr, train_hr, scale=scale,
-                                patch_size=patch_size, upsample_lr=upsample_lr)
-
-    val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
-                          upsample_lr=upsample_lr)
+        if args.val_split > 0:
+            train_names, val_names = split_train_val(train_hr, args.val_split)
+            train_ds = PatchDataset(train_lr, train_hr, scale=scale,
+                                    patch_size=patch_size, upsample_lr=upsample_lr,
+                                    file_names=train_names)
+            # Validation on held-out train_set images (LR/HR from train dirs)
+            val_ds = PatchDataset(train_lr, train_hr, scale=scale,
+                                  patch_size=patch_size, upsample_lr=upsample_lr,
+                                  file_names=val_names)
+            print(f'Train/val split: {len(train_names)} train / {len(val_names)} val images '
+                  f'(from {train_set})')
+        else:
+            train_ds = PatchDataset(train_lr, train_hr, scale=scale,
+                                    patch_size=patch_size, upsample_lr=upsample_lr)
+            val_ds = PatchDataset(val_lr, val_hr, scale=scale, patch_size=patch_size,
+                                  upsample_lr=upsample_lr)
+            print(f'Cross-dataset validation on {test_set} ({len(os.listdir(val_hr))} images)')
 
     # Windows: num_workers=0, no pin_memory on CPU
     num_workers = 0
@@ -170,26 +231,46 @@ def main():
     val_loader = DataLoader(val_ds, batch_size=1, shuffle=False,
                             num_workers=num_workers, pin_memory=pin_memory)
 
-    scaler = torch.cuda.amp.GradScaler() if (device == 'cuda') else None
+    scaler = torch.amp.GradScaler('cuda') if (device == 'cuda') else None
     trainer = Trainer(model, loss_fn, optimizer, device, scaler=scaler)
 
-    # --- Bicubic baseline ---
+    # --- Bicubic baseline (on test_set, reference only) ---
     base_psnr, base_ssim = bicubic_baseline(val_lr, val_hr, scale, device)
     print(f'Bicubic baseline on {test_set} x{scale}: PSNR {base_psnr:.2f} SSIM {base_ssim:.4f}')
 
+    # --- Epoch log file ---
+    log_file = args.log_file
+    if log_file:
+        os.makedirs(os.path.dirname(log_file) or '.', exist_ok=True)
+        with open(log_file, 'w') as f:
+            f.write('epoch,train_loss,val_psnr,val_ssim,best_psnr\n')
+
     # --- Training loop ---
     best_psnr = float('-inf')
-    best_path = os.path.join('outputs', 'checkpoints', f'{model_name}_{scale}x_{loss_name}.pt')
+    ckpt_name = f'{model_name}_{scale}x_{loss_name}'
+    if args.ckpt_tag:
+        ckpt_name += f'_{args.ckpt_tag}'
+    best_path = os.path.join('outputs', 'checkpoints', f'{ckpt_name}.pt')
     os.makedirs(os.path.dirname(best_path), exist_ok=True)
 
     patience_counter = 0
     for epoch in range(1, max_epochs + 1):
+        # Curriculum: enable perceptual loss after warmup epochs
+        if (isinstance(loss_fn, HybridLoss) and args.perc_warmup_epochs > 0
+                and epoch == args.perc_warmup_epochs + 1):
+            loss_fn.lambda_perc = perceptual_lambda
+            print(f'  -> Enabling perceptual loss (lambda={perceptual_lambda}) after warmup')
+
         train_loss = trainer.train_one_epoch(train_loader, grad_accum=grad_accum)
         val_psnr, val_ssim = trainer.validate(val_loader, compute_psnr_ssim, scale=scale)
 
         print(f'Epoch {epoch:3d}/{max_epochs} '
               f'train_loss {train_loss:.6f} '
               f'val_PSNR {val_psnr:.2f} val_SSIM {val_ssim:.4f}')
+
+        if log_file:
+            with open(log_file, 'a') as f:
+                f.write(f'{epoch},{train_loss:.6f},{val_psnr:.4f},{val_ssim:.4f},{best_psnr:.4f}\n')
 
         if val_psnr > best_psnr:
             best_psnr = val_psnr
@@ -199,7 +280,7 @@ def main():
         else:
             patience_counter += 1
 
-        if patience_counter >= patience:
+        if not args.no_early_stop and patience_counter >= patience:
             print(f'Early stopping at epoch {epoch} (no val PSNR improvement for {patience} epochs)')
             break
 

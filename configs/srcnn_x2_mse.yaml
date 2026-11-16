@@ -1,6 +1,0 @@
-model: srcnn
-scale: 2
-loss: mse
-lr: 0.0001
-batch_size: 8
-epochs: 100

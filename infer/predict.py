@@ -41,10 +41,10 @@ def preprocess(img, model_type, scale):
 
 
 @torch.no_grad()
-def run_inference(model, x, device):
+def run_inference(model, x, model_type, device):
     x = x.to(device)
     out = model(x)
-    return out.squeeze(0).clamp(0, 1)
+    return out.squeeze(0).clamp(0.0, 1.0)
 
 
 def save_image(tensor, path):
@@ -73,7 +73,7 @@ def main():
     img = Image.open(args.img).convert('RGB')
     x = preprocess(img, args.model_type, args.scale)
 
-    out = run_inference(model, x, args.device)
+    out = run_inference(model, x, args.model_type, args.device)
     save_image(out, args.out)
     print(f'Saved SR output to {args.out} (scale {args.scale}x, {args.model_type})')
 

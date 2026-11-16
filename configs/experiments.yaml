@@ -3,68 +3,67 @@ experiments:
     model: srcnn
     scale: 2
     loss: mse
-    train_set: Set5
+    train_set: T91
     test_set: Set14
     device: local
   E2:
     model: srcnn
-    scale: 4
-    loss: mse
-    train_set: Set5
+    scale: 2
+    loss: mse_perceptual
+    train_set: T91
     test_set: Set14
     device: local
   E3:
-    model: espcn
-    scale: 2
+    model: srcnn
+    scale: 4
     loss: mse
-    train_set: Set5
+    train_set: T91
     test_set: Set14
     device: local
   E4:
-    model: espcn
+    model: srcnn
     scale: 4
-    loss: mse
-    train_set: Set5
+    loss: mse_perceptual
+    train_set: T91
     test_set: Set14
     device: local
   E5:
     model: espcn
     scale: 2
-    loss: mse_perceptual
-    train_set: Set5
+    loss: mse
+    train_set: T91
     test_set: Set14
-    device: colab
+    device: local
   E6:
     model: espcn
-    scale: 4
+    scale: 2
     loss: mse_perceptual
-    train_set: Set5
+    train_set: T91
     test_set: Set14
-    device: colab
+    device: local
   E7:
     model: espcn
     scale: 4
     loss: mse
-    train_set: Set5_degraded
+    train_set: T91
     test_set: Set14
     device: local
   E8:
     model: espcn
     scale: 4
     loss: mse_perceptual
-    train_set: Set5_degraded
+    train_set: T91
     test_set: Set14
-    device: colab
+    device: local
 
 hyperparams:
-  lr: 1.0e-4
-  batch_size_local_mse: 4
-  batch_size_local_perceptual: 2
-  batch_size_colab: 8
-  grad_accum_steps: 4
-  max_epochs: 200
-  early_stop_patience: 15
-  perceptual_lambda: 0.07
+  lr: 2.0e-4
+  batch_size_local_mse: 16
+  batch_size_local_perceptual: 8
+  grad_accum_steps: 1
+  max_epochs: 15
+  early_stop_patience: 6
+  perceptual_lambda: 0.05
   patch_lr_2x: 32
-  patch_lr_4x: 48
+  patch_lr_4x: 32
   num_threads: 8
