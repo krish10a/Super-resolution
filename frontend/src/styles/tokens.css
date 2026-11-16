@@ -1,0 +1,85 @@
+/* ==========================================================================
+   SISR·LAB — Forensic Precision Laboratory Design System Tokens
+   Extracted from STITCH UI TEMPLATE (DESIGN.md & tailwind-config)
+   ========================================================================== */
+
+:root {
+  /* Surfaces & Containers */
+  --surface-container-lowest: #0c0e11;
+  --surface-container-low: #1a1c1f;
+  --surface-container: #1e2023;
+  --surface-container-high: #282a2e;
+  --surface-container-highest: #333538;
+  --surface: #111417;
+  --surface-dim: #111417;
+  --surface-bright: #37393d;
+  --background: #111417;
+
+  /* Core Canvas & Hairline Borders */
+  --bg-base: #07090C;
+  --surface-1: #0E1217;
+  --surface-2-raised: #141A21;
+  --border: #1F2832;
+  --outline: #859397;
+  --outline-variant: #3c494c;
+
+  /* High Contrast Text */
+  --on-surface: #e2e2e7;
+  --on-surface-variant: #bbc9cd;
+  --on-background: #e2e2e7;
+  --text-primary: #E6EBF1;
+  --text-muted: #8793A2;
+
+  /* Primary Signal Accents */
+  --primary: #c2f3ff;
+  --on-primary: #00363f;
+  --primary-container: #38e1ff;
+  --on-primary-container: #00616f;
+  --primary-fixed: #a6eeff;
+  --primary-fixed-dim: #27d9f7;
+  --surface-tint: #27d9f7;
+
+  /* Secondary & Tertiary */
+  --secondary: #bbc8d8;
+  --on-secondary: #26313e;
+  --secondary-container: #3c4855;
+  --on-secondary-container: #aab6c6;
+  --tertiary: #e2ebf9;
+  --on-tertiary: #28313b;
+  --tertiary-container: #c6cfdc;
+
+  /* Functional Status & Signals */
+  --good: #34D399;
+  --bad: #FF5C6C;
+  --amber: #FFB020;
+  --error: #ffb4ab;
+  --on-error: #690005;
+  --error-container: #93000a;
+
+  /* Scientific Model Markers */
+  --srcnn: #A78BFA;
+  --espcn: #22D3EE;
+  --bicubic: #94A3B8;
+
+  /* Radii */
+  --radius-sm: 0.25rem;
+  --radius-default: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Chrome Heights */
+  --topbar-height: 56px;
+  --statusbar-height: 28px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

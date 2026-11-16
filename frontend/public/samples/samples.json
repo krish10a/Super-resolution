@@ -1,0 +1,121 @@
+[
+  {
+    "id": "cctv_signage",
+    "group": "Surveillance",
+    "name": "CCTV Signage",
+    "thumbUrl": "/samples/cctv_signage.png",
+    "lrUrl": "/samples/cctv_signage.png",
+    "hrUrl": "/samples/cctv_signage.png",
+    "isRealCctv": true,
+    "hasGroundTruth": false,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "security_person",
+    "group": "Surveillance",
+    "name": "Security Guard",
+    "thumbUrl": "/samples/security_person.png",
+    "lrUrl": "/samples/security_person.png",
+    "hrUrl": "/samples/security_person.png",
+    "isRealCctv": true,
+    "hasGroundTruth": false,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "surveillance_face",
+    "group": "Surveillance",
+    "name": "Suspect Face",
+    "thumbUrl": "/samples/surveillance_face.png",
+    "lrUrl": "/samples/surveillance_face.png",
+    "hrUrl": "/samples/surveillance_face.png",
+    "isRealCctv": true,
+    "hasGroundTruth": false,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "surveillance_vehicle",
+    "group": "Surveillance",
+    "name": "Vehicle Plate",
+    "thumbUrl": "/samples/surveillance_vehicle.png",
+    "lrUrl": "/samples/surveillance_vehicle.png",
+    "hrUrl": "/samples/surveillance_vehicle.png",
+    "isRealCctv": true,
+    "hasGroundTruth": false,
+    "width": 128,
+    "height": 128
+  },
+  {
+    "id": "set5_butterfly",
+    "group": "Set5",
+    "name": "Butterfly",
+    "thumbUrl": "/samples/set5_butterfly_lr_x2.png",
+    "lrUrls": {
+      "2": "/samples/set5_butterfly_lr_x2.png",
+      "4": "/samples/set5_butterfly_lr_x4.png"
+    },
+    "hrUrl": "/samples/set5_butterfly_hr.png",
+    "isRealCctv": false,
+    "hasGroundTruth": true,
+    "datasetKey": "Set5_02"
+  },
+  {
+    "id": "set5_baby",
+    "group": "Set5",
+    "name": "Baby",
+    "thumbUrl": "/samples/set5_baby_lr_x2.png",
+    "lrUrls": {
+      "2": "/samples/set5_baby_lr_x2.png",
+      "4": "/samples/set5_baby_lr_x4.png"
+    },
+    "hrUrl": "/samples/set5_baby_hr.png",
+    "isRealCctv": false,
+    "hasGroundTruth": true,
+    "datasetKey": "Set5_00"
+  },
+  {
+    "id": "set5_bird",
+    "group": "Set5",
+    "name": "Bird",
+    "thumbUrl": "/samples/set5_bird_lr_x2.png",
+    "lrUrls": {
+      "2": "/samples/set5_bird_lr_x2.png",
+      "4": "/samples/set5_bird_lr_x4.png"
+    },
+    "hrUrl": "/samples/set5_bird_hr.png",
+    "isRealCctv": false,
+    "hasGroundTruth": true,
+    "datasetKey": "Set5_01"
+  },
+  {
+    "id": "set14_01",
+    "group": "Set14",
+    "name": "Comic / Face",
+    "thumbUrl": "/samples/set14_01_lr_x2.png",
+    "lrUrls": {
+      "2": "/samples/set14_01_lr_x2.png",
+      "4": "/samples/set14_01_lr_x4.png"
+    },
+    "hrUrl": "/samples/set14_01_hr.png",
+    "isRealCctv": false,
+    "hasGroundTruth": true,
+    "datasetKey": "Set14_00"
+  },
+  {
+    "id": "bsd100_01",
+    "group": "BSD100",
+    "name": "BSD Urban",
+    "thumbUrl": "/samples/bsd100_01_lr_x2.png",
+    "lrUrls": {
+      "2": "/samples/bsd100_01_lr_x2.png",
+      "4": "/samples/bsd100_01_lr_x4.png"
+    },
+    "hrUrl": "/samples/bsd100_01_hr.png",
+    "isRealCctv": false,
+    "hasGroundTruth": true,
+    "datasetKey": "BSD100_00"
+  }
+]
+
