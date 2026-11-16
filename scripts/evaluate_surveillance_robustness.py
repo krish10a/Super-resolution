@@ -67,10 +67,10 @@ def run_eval(lr_np: np.ndarray, hr_np: np.ndarray, model, model_name: str, scale
 
     if model_name == "bicubic":
         h_hr, w_hr = hr_np.shape[:2]
-        bic = cv2.resize(lr_np, (w_hr, h_hr), interpolation=cv2.INTER_CUBIC)
-        pred_t = torch.from_numpy(bic).permute(2, 0, 1).float() / 255.0
+        bic_img = Image.fromarray(lr_np).resize((w_hr, h_hr), Image.BICUBIC)
+        pred_t = torch.from_numpy(np.array(bic_img, dtype=np.float32) / 255.0).permute(2, 0, 1)
     else:
-        inp_t = torch.from_numpy(lr_np).permute(2, 0, 1).unsqueeze(0).float().to(DEVICE) / 255.0
+        inp_t = torch.from_numpy(lr_np.astype(np.float32) / 255.0).permute(2, 0, 1).unsqueeze(0).to(DEVICE)
         with torch.no_grad():
             out_t = model(inp_t).squeeze(0).cpu().clamp(0.0, 1.0)
         min_h = min(out_t.shape[1], hr_t.shape[1])

@@ -20,11 +20,9 @@ import numpy as np
 
 
 def downscale_bicubic(img: np.ndarray, scale: int) -> np.ndarray:
-    """Downsample HR image to LR by factor `scale` using bicubic interpolation."""
-    h, w = img.shape[:2]
-    lr = cv2.resize(img, (max(1, w // scale), max(1, h // scale)),
-                    interpolation=cv2.INTER_CUBIC)
-    return lr
+    """Downsample HR image to LR by factor `scale` using MATLAB-compatible bicubic downsampling with antialiasing."""
+    from data.imresize_matlab import imresize_matlab
+    return imresize_matlab(img, scale=1.0 / scale, antialiasing=True)
 
 
 def gaussian_blur(img: np.ndarray, ksize: int = 5, sigma: float = 1.0) -> np.ndarray:
