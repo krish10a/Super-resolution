@@ -63,7 +63,7 @@ def test_health(client):
     assert body["device"] in ("cuda", "cpu")
     assert "cuda_available" in body
     assert isinstance(body["models_available"], int)
-    assert body["models_available"] == 8
+    assert body["models_available"] == 14
 
 
 # --------------------------------------------------------------------------- model registry / listing
@@ -71,9 +71,14 @@ def test_list_models(client):
     r = client.get("/api/v1/models")
     assert r.status_code == 200
     models = r.json()
-    assert len(models) == 8
+    assert len(models) == 14
     ids = {m["model_id"] for m in models}
     expected = {
+        # Phase 3 DIV2K Models
+        "edsr_2x_l1", "edsr_4x_l1",
+        "espcn_2x_charbonnier", "espcn_4x_charbonnier",
+        "fsrcnn_2x_charbonnier", "fsrcnn_4x_charbonnier",
+        # Legacy Models
         "srcnn_2x_mse", "srcnn_2x_mse_perceptual",
         "srcnn_4x_mse", "srcnn_4x_mse_perceptual",
         "espcn_2x_mse", "espcn_2x_mse_perceptual",
@@ -81,9 +86,9 @@ def test_list_models(client):
     }
     assert ids == expected
     for m in models:
-        assert m["architecture"] in ("srcnn", "espcn")
+        assert m["architecture"] in ("srcnn", "espcn", "fsrcnn", "edsr")
         assert m["scale"] in (2, 4)
-        assert m["loss"] in ("mse", "mse_perceptual")
+        assert m["loss"] in ("mse", "mse_perceptual", "charbonnier", "l1")
         assert m["checkpoint"].endswith(".pt")
         assert m["device"] in ("cuda", "cpu")
 
@@ -116,7 +121,7 @@ def test_registry_loads_all_checkpoints(registry):
         assert info.param_count is not None and info.param_count > 0
         assert info.load_error is None
         loaded += 1
-    assert loaded == 8
+    assert loaded == 14
 
 
 def test_registry_unknown_model(registry):
@@ -130,6 +135,10 @@ def test_registry_unknown_model(registry):
     ("srcnn_4x_mse", 4),
     ("espcn_2x_mse", 2),
     ("espcn_4x_mse", 4),
+    ("espcn_2x_charbonnier", 2),
+    ("fsrcnn_2x_charbonnier", 2),
+    ("edsr_2x_l1", 2),
+    ("edsr_4x_l1", 4),
 ])
 def test_super_resolve_dimensions(client, model_id, scale):
     lr = 64
@@ -144,9 +153,19 @@ def test_super_resolve_dimensions(client, model_id, scale):
     assert body["scale"] == scale
     assert body["device"] in ("cuda", "cpu")
     assert body["checkpoint"].endswith(".pt")
-    assert body["pipeline"] in ("srcnn_bicubic_upsample", "espcn_pixelshuffle")
+    assert body["pipeline"] in ("srcnn_bicubic_upsample", "espcn_pixelshuffle", "fsrcnn_direct", "edsr_direct")
     assert body["latency_ms"] >= 0
     assert body["image_base64"]
+
+
+def test_super_resolve_with_denoise(client):
+    lr = 64
+    files = _upload(_make_png_bytes((lr, lr)))
+    data = {"model": "edsr_2x_l1", "denoise": "bilateral"}
+    r = client.post("/api/v1/super-resolve", files=files, data=data)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["output_size"] == [lr * 2, lr * 2]
 
 
 def test_super_resolve_srcnn_pipeline(client):

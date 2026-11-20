@@ -158,4 +158,28 @@ Evaluated on NVIDIA GeForce RTX 2050 (4GB VRAM):
 - **Phase 3 Checkpoints:** `outputs/checkpoints/phase3/` (`E9` through `E14` best & recovery weights)
 - **Backend Model Registry:** Updated in `backend/app/registry.py` and `backend/app/inference.py` to seamlessly serve E9–E14.
 - **Frontend Verification:** Built and verified with 0 build errors.
-- **Unit & Regression Tests:** 135/135 tests passing (`pytest tests/`).
+- **Unit & Regression Tests:** 147/147 tests passing (`python -m pytest tests/`).
+
+---
+
+## 6. Phase 4.2 Statistical Robustness Validation Summary
+
+*Full report available at [PHASE_4_2_STATISTICAL_ROBUSTNESS_REPORT.md](file:///c:/Users/ASUS/Desktop/cv/reports/PHASE_4_2_STATISTICAL_ROBUSTNESS_REPORT.md).*
+
+Evaluated 9,120 paired image inferences across Set14 ($n=14$) and BSD100 ($n=100$) across 5 conditions with 10,000 paired bootstrap resamples:
+- **Clean Parity:** Matches canonical benchmark evaluator to $0.0000\text{ dB}$ across all models.
+- **Sensor Noise ($\sigma=10$):** Unconditioned deep models amplify noise below Bicubic (E11 EDSR $2\times$ on BSD100 is $-0.6242\text{ dB}$ below Bicubic; $95\%\text{ CI: } [-0.7976, -0.4552]\text{ dB}$).
+- **Motion Blur ($k=5, 45^\circ$):** Deep models achieve $100\%$ win rate against Bicubic (E11 EDSR $2\times$: $+0.7349\text{ dB}$, $95\%\text{ CI: } [+0.6908, +0.7819]\text{ dB}$).
+- **Combined CCTV:** Direct SR improvement over Bicubic is statistically inconclusive ($95\%\text{ CI: } [-0.0279, +0.0254]\text{ dB}$ spans zero).
+
+---
+
+## 7. Phase 4.3 Denoising Ablation Study Summary
+
+*Full report available at [PHASE_4_3_DENOISING_ABLATION_REPORT.md](file:///c:/Users/ASUS/Desktop/cv/reports/PHASE_4_3_DENOISING_ABLATION_REPORT.md).*
+
+Evaluated 4,104 image inferences comparing A0 (direct SR), A1 (Non-Local Means), and A2 (Bilateral Filter):
+- **Bilateral Filter (A2) Rescues Deep SISR:** Adds only **$0.86\text{ ms}$** latency, improving EDSR $2\times$ under sensor noise by **$+1.3533\text{ dB}$** ($95\%\text{ CI: } [+1.1714, +1.5508]\text{ dB}$) and converting a $-0.62\text{ dB}$ deficit into a **$+0.7291\text{ dB}$ victory over Bicubic**.
+- **Non-Local Means (A1) Ineffective:** Suffers $>200\text{ ms}$ latency while providing only $+0.1463\text{ dB}$ gain.
+- **Production Recommendation:** Prepend a lightweight bilateral filter to deep SISR models for operational surveillance feeds.
+

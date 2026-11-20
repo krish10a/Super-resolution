@@ -1,7 +1,23 @@
-export type ExperimentId = 'E1' | 'E2' | 'E3' | 'E4' | 'E5' | 'E6' | 'E7' | 'E8';
-export type ModelName = 'SRCNN' | 'ESPCN';
+export type ExperimentId =
+  | 'E1'
+  | 'E2'
+  | 'E3'
+  | 'E4'
+  | 'E5'
+  | 'E6'
+  | 'E7'
+  | 'E8'
+  | 'E9'
+  | 'E10'
+  | 'E11'
+  | 'E12'
+  | 'E13'
+  | 'E14';
+
+export type ModelName = 'EDSR' | 'ESPCN' | 'FSRCNN' | 'SRCNN';
 export type Scale = 2 | 4;
-export type LossName = 'MSE' | 'MSE + Perceptual';
+export type LossName = 'L1' | 'Charbonnier' | 'MSE' | 'MSE + Perceptual';
+export type DenoiseOption = 'none' | 'bilateral' | 'nlm';
 
 export interface Metrics {
   psnr: number;

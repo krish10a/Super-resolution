@@ -1,0 +1,212 @@
+{
+  "Clean": {
+    "Bicubic_2x": {
+      "psnr": 30.31,
+      "ssim": 0.8814,
+      "scale": 2
+    },
+    "E9_ESPCN_2x": {
+      "psnr": 31.8,
+      "ssim": 0.909,
+      "scale": 2
+    },
+    "E10_FSRCNN_2x": {
+      "psnr": 31.29,
+      "ssim": 0.9043,
+      "scale": 2
+    },
+    "E11_EDSR_2x": {
+      "psnr": 32.43,
+      "ssim": 0.9166,
+      "scale": 2
+    },
+    "Bicubic_4x": {
+      "psnr": 26.08,
+      "ssim": 0.7216,
+      "scale": 4
+    },
+    "E12_ESPCN_4x": {
+      "psnr": 26.74,
+      "ssim": 0.7497,
+      "scale": 4
+    },
+    "E13_FSRCNN_4x": {
+      "psnr": 26.52,
+      "ssim": 0.7459,
+      "scale": 4
+    },
+    "E14_EDSR_4x": {
+      "psnr": 27.63,
+      "ssim": 0.7752,
+      "scale": 4
+    }
+  },
+  "Sensor_Noise": {
+    "Bicubic_2x": {
+      "psnr": 28.73,
+      "ssim": 0.7938,
+      "scale": 2
+    },
+    "E9_ESPCN_2x": {
+      "psnr": 28.12,
+      "ssim": 0.7375,
+      "scale": 2
+    },
+    "E10_FSRCNN_2x": {
+      "psnr": 28.23,
+      "ssim": 0.7498,
+      "scale": 2
+    },
+    "E11_EDSR_2x": {
+      "psnr": 28.06,
+      "ssim": 0.7314,
+      "scale": 2
+    },
+    "Bicubic_4x": {
+      "psnr": 25.4,
+      "ssim": 0.6599,
+      "scale": 4
+    },
+    "E12_ESPCN_4x": {
+      "psnr": 25.28,
+      "ssim": 0.6233,
+      "scale": 4
+    },
+    "E13_FSRCNN_4x": {
+      "psnr": 25.28,
+      "ssim": 0.6349,
+      "scale": 4
+    },
+    "E14_EDSR_4x": {
+      "psnr": 25.56,
+      "ssim": 0.6352,
+      "scale": 4
+    }
+  },
+  "Motion_Blur": {
+    "Bicubic_2x": {
+      "psnr": 27.8,
+      "ssim": 0.8053,
+      "scale": 2
+    },
+    "E9_ESPCN_2x": {
+      "psnr": 28.45,
+      "ssim": 0.8283,
+      "scale": 2
+    },
+    "E10_FSRCNN_2x": {
+      "psnr": 28.22,
+      "ssim": 0.8247,
+      "scale": 2
+    },
+    "E11_EDSR_2x": {
+      "psnr": 28.58,
+      "ssim": 0.8326,
+      "scale": 2
+    },
+    "Bicubic_4x": {
+      "psnr": 25.65,
+      "ssim": 0.7,
+      "scale": 4
+    },
+    "E12_ESPCN_4x": {
+      "psnr": 26.36,
+      "ssim": 0.7319,
+      "scale": 4
+    },
+    "E13_FSRCNN_4x": {
+      "psnr": 26.15,
+      "ssim": 0.7282,
+      "scale": 4
+    },
+    "E14_EDSR_4x": {
+      "psnr": 27.13,
+      "ssim": 0.7536,
+      "scale": 4
+    }
+  },
+  "JPEG_Q40": {
+    "Bicubic_2x": {
+      "psnr": 27.99,
+      "ssim": 0.7858,
+      "scale": 2
+    },
+    "E9_ESPCN_2x": {
+      "psnr": 27.89,
+      "ssim": 0.7789,
+      "scale": 2
+    },
+    "E10_FSRCNN_2x": {
+      "psnr": 27.77,
+      "ssim": 0.7766,
+      "scale": 2
+    },
+    "E11_EDSR_2x": {
+      "psnr": 27.87,
+      "ssim": 0.7796,
+      "scale": 2
+    },
+    "Bicubic_4x": {
+      "psnr": 24.67,
+      "ssim": 0.6216,
+      "scale": 4
+    },
+    "E12_ESPCN_4x": {
+      "psnr": 24.65,
+      "ssim": 0.6139,
+      "scale": 4
+    },
+    "E13_FSRCNN_4x": {
+      "psnr": 24.55,
+      "ssim": 0.611,
+      "scale": 4
+    },
+    "E14_EDSR_4x": {
+      "psnr": 24.72,
+      "ssim": 0.6188,
+      "scale": 4
+    }
+  },
+  "Combined_CCTV": {
+    "Bicubic_2x": {
+      "psnr": 26.69,
+      "ssim": 0.7342,
+      "scale": 2
+    },
+    "E9_ESPCN_2x": {
+      "psnr": 26.74,
+      "ssim": 0.7284,
+      "scale": 2
+    },
+    "E10_FSRCNN_2x": {
+      "psnr": 26.66,
+      "ssim": 0.7267,
+      "scale": 2
+    },
+    "E11_EDSR_2x": {
+      "psnr": 26.74,
+      "ssim": 0.7293,
+      "scale": 2
+    },
+    "Bicubic_4x": {
+      "psnr": 24.48,
+      "ssim": 0.6126,
+      "scale": 4
+    },
+    "E12_ESPCN_4x": {
+      "psnr": 24.53,
+      "ssim": 0.6052,
+      "scale": 4
+    },
+    "E13_FSRCNN_4x": {
+      "psnr": 24.43,
+      "ssim": 0.6022,
+      "scale": 4
+    },
+    "E14_EDSR_4x": {
+      "psnr": 24.63,
+      "ssim": 0.6104,
+      "scale": 4
+    }
+  }
+}

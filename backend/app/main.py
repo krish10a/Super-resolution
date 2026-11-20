@@ -201,8 +201,9 @@ def get_model(model_id: str):
 @app.post("/api/v1/super-resolve", response_model=SuperResolveResponse, tags=["inference"])
 async def super_resolve(
     file: UploadFile = File(..., description="LR image (jpg/jpeg/png/webp)"),
-    model: str = Form(..., description="Model id, e.g. srcnn_2x_mse"),
+    model: str = Form(..., description="Model id, e.g. srcnn_2x_mse, edsr_2x_l1"),
     simulate_lr: bool = Form(False, description="Downscale/degrade HR into realistic CCTV LR before super-resolving"),
+    denoise: Optional[str] = Form(None, description="Optional surveillance pre-filter: bilateral or nlm"),
 ):
     try:
         data = await file.read()
@@ -213,7 +214,7 @@ async def super_resolve(
         return _error("Invalid upload", detail=str(exc), code=status.HTTP_400_BAD_REQUEST)
 
     try:
-        result = inference.infer(model, data, simulate_lr=simulate_lr)
+        result = inference.infer(model, data, simulate_lr=simulate_lr, denoise=denoise)
     except ValueError as exc:
         return _error(str(exc), code=status.HTTP_404_NOT_FOUND if "Unknown" in str(exc) else status.HTTP_400_BAD_REQUEST)
     except RuntimeError as exc:

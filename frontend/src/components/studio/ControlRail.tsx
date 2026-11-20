@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ModelName, Scale, LossName, SampleItem, DegradationSettings } from '../../lib/types';
+import { ModelName, Scale, LossName, DenoiseOption, SampleItem, DegradationSettings } from '../../lib/types';
 import { resolveExperiment } from '../../lib/metricsMath';
 import { Segmented } from '../ui/Segmented';
 import { Dropzone } from '../ui/Dropzone';
@@ -12,8 +12,12 @@ export interface ControlRailProps {
   onModelChange: (model: ModelName) => void;
   scale: Scale;
   onScaleChange: (scale: Scale) => void;
-  loss: LossName;
-  onLossChange: (loss: LossName) => void;
+  loss?: LossName;
+  onLossChange?: (loss: LossName) => void;
+  denoise?: DenoiseOption;
+  onDenoiseChange?: (denoise: DenoiseOption) => void;
+  isLegacy?: boolean;
+  onIsLegacyChange?: (isLegacy: boolean) => void;
   samples: SampleItem[];
   selectedSample: SampleItem | null;
   onSampleSelect: (sample: SampleItem) => void;
@@ -35,6 +39,10 @@ export const ControlRail: React.FC<ControlRailProps> = ({
   onScaleChange,
   loss,
   onLossChange,
+  denoise = 'none',
+  onDenoiseChange,
+  isLegacy = false,
+  onIsLegacyChange,
   samples,
   selectedSample,
   onSampleSelect,
@@ -49,7 +57,7 @@ export const ControlRail: React.FC<ControlRailProps> = ({
   className = '',
 }) => {
   const [degradeOpen, setDegradeOpen] = useState(false);
-  const resolved = resolveExperiment(model, scale, loss);
+  const resolved = resolveExperiment(model, scale, loss, isLegacy);
 
   // Degradation is enabled only when using sample presets (not raw uploads)
   const degradationAvailable = Boolean(selectedSample && !customImage);
@@ -83,16 +91,47 @@ export const ControlRail: React.FC<ControlRailProps> = ({
 
         {/* Section 2: Model Architecture */}
         <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-            2. Architecture
-          </label>
+          <div className="flex items-center justify-between">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+              2. Architecture
+            </label>
+            {onIsLegacyChange && (
+              <label className="flex items-center gap-1.5 text-[11px] text-[var(--muted)] cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isLegacy}
+                  onChange={(e) => {
+                    const legacy = e.target.checked;
+                    onIsLegacyChange(legacy);
+                    if (legacy) {
+                      onModelChange('SRCNN');
+                      onLossChange?.('MSE');
+                    } else {
+                      onModelChange('EDSR');
+                      onLossChange?.('L1');
+                    }
+                  }}
+                  className="rounded border-[var(--border)] text-[var(--accent)] text-xs"
+                />
+                <span>Legacy</span>
+              </label>
+            )}
+          </div>
           <div className="w-full">
             <Segmented
               id="model-selector"
-              options={[
-                { value: 'SRCNN', label: 'SRCNN' },
-                { value: 'ESPCN', label: 'ESPCN' },
-              ]}
+              options={
+                isLegacy
+                  ? [
+                      { value: 'SRCNN', label: 'SRCNN' },
+                      { value: 'ESPCN', label: 'ESPCN' },
+                    ]
+                  : [
+                      { value: 'EDSR', label: 'EDSR (Quality)' },
+                      { value: 'ESPCN', label: 'ESPCN (Fast)' },
+                      { value: 'FSRCNN', label: 'FSRCNN (Balanced)' },
+                    ]
+              }
               value={model}
               onChange={onModelChange}
               className="w-full justify-between"
@@ -119,26 +158,52 @@ export const ControlRail: React.FC<ControlRailProps> = ({
           </div>
         </div>
 
-        {/* Section 4: Training Loss */}
-        <div className="space-y-2">
-          <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
-            4. Supervision Loss
-          </label>
-          <div className="w-full">
-            <Segmented
-              id="loss-selector"
-              options={[
-                { value: 'MSE', label: 'MSE' },
-                { value: 'MSE + Perceptual', label: 'MSE + Perc' },
-              ]}
-              value={loss}
-              onChange={onLossChange}
-              className="w-full justify-between"
-            />
+        {/* Section 4: CCTV Pre-Filter (Phase 4.3 Denoising) */}
+        {onDenoiseChange && (
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+              4. CCTV Pre-Filter
+            </label>
+            <div className="w-full">
+              <Segmented
+                id="denoise-selector"
+                options={[
+                  { value: 'none', label: 'Off' },
+                  { value: 'bilateral', label: 'Bilateral (+1.35 dB)' },
+                ]}
+                value={denoise}
+                onChange={onDenoiseChange}
+                className="w-full justify-between"
+              />
+            </div>
+            <p className="text-[11px] text-[var(--muted)]">
+              Edge-preserving filter before SISR inference. Rescues sensor & CCTV noise (+0.86ms).
+            </p>
           </div>
-        </div>
+        )}
 
-        {/* Section 5: Resolved Checkpoint */}
+        {/* Section 5: Training Loss (Legacy Only) */}
+        {isLegacy && onLossChange && (
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-[var(--muted)]">
+              5. Supervision Loss
+            </label>
+            <div className="w-full">
+              <Segmented
+                id="loss-selector"
+                options={[
+                  { value: 'MSE', label: 'MSE' },
+                  { value: 'MSE + Perceptual', label: 'MSE + Perc' },
+                ]}
+                value={loss || 'MSE'}
+                onChange={onLossChange}
+                className="w-full justify-between"
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Section 6: Resolved Checkpoint */}
         <div className="p-3 rounded-[var(--radius-control)] bg-[var(--bg-base)] border border-[var(--border)] space-y-1">
           <div className="flex items-center justify-between text-[11px] text-[var(--muted)]">
             <span>Experiment</span>
@@ -149,7 +214,7 @@ export const ControlRail: React.FC<ControlRailProps> = ({
           </div>
         </div>
 
-        {/* Section 6: Surveillance Degradation Simulator */}
+        {/* Section 7: Surveillance Degradation Simulator */}
         <div className="border border-[var(--border)] rounded-[var(--radius-control)] bg-[var(--raised)]/40 overflow-hidden">
           <button
             type="button"
@@ -238,4 +303,5 @@ export const ControlRail: React.FC<ControlRailProps> = ({
     </aside>
   );
 };
+
 

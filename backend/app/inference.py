@@ -18,6 +18,7 @@ import time
 from dataclasses import dataclass
 from typing import Tuple, Optional
 
+import cv2
 import numpy as np
 import torch
 from PIL import Image, ImageOps
@@ -107,13 +108,16 @@ class InferenceService:
         return self._tensor_to_pil(out)
 
     # ------------------------------------------------------------------ public API
-    def infer(self, model_id: str, image_bytes: bytes, simulate_lr: bool = False) -> InferenceResult:
+    def infer(self, model_id: str, image_bytes: bytes, simulate_lr: bool = False, denoise: Optional[str] = None) -> InferenceResult:
         """Run real inference for `model_id` on the uploaded image bytes.
 
         If `simulate_lr=True`:
           The uploaded image is treated as high-resolution ground truth, downsampled/degraded
           to realistic surveillance camera resolution (mimicking a distance CCTV sensor),
           and then super-resolved. Both the degraded LR and the super-resolved output are returned!
+
+        If `denoise` is provided ("bilateral" or "nlm"):
+          The LR input is filtered before entering the SR model to eliminate sensor noise.
         """
         info = self.registry.get_info(model_id)
         if info is None:
@@ -168,6 +172,18 @@ class InferenceService:
             lr_img = img
             lr_np = self._pil_to_np_rgb(lr_img)
 
+        # Apply optional surveillance pre-filter / denoiser
+        if denoise == "bilateral":
+            lr_np = cv2.bilateralFilter(lr_np, d=5, sigmaColor=25, sigmaSpace=25)
+            lr_img = Image.fromarray(lr_np, mode="RGB")
+        elif denoise == "nlm":
+            lr_bgr = cv2.cvtColor(lr_np, cv2.COLOR_RGB2BGR)
+            denoised_bgr = cv2.fastNlMeansDenoisingColored(
+                lr_bgr, None, h=3, hColor=3, templateWindowSize=7, searchWindowSize=21
+            )
+            lr_np = cv2.cvtColor(denoised_bgr, cv2.COLOR_BGR2RGB)
+            lr_img = Image.fromarray(lr_np, mode="RGB")
+
         # Encode LR image for frontend comparison
         lr_buf = io.BytesIO()
         lr_img.save(lr_buf, format="PNG")
@@ -182,7 +198,7 @@ class InferenceService:
                 pipeline = "srcnn_bicubic_upsample"
             elif info.architecture in ["espcn", "fsrcnn", "edsr"]:
                 sr_img = self._espcn_pipeline(model, lr_np, scale, device)
-                pipeline = f"{info.architecture}_direct"
+                pipeline = "espcn_pixelshuffle" if info.architecture == "espcn" else f"{info.architecture}_direct"
             else:
                 raise ValueError(f"Unsupported architecture: {info.architecture}")
         finally:

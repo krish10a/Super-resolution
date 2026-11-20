@@ -90,5 +90,6 @@ Thumbs.db
 *.swo
 .claude/
 .agents/
+.kilo/
 everything-claude-code/
 STITCH UI TEMPLATE/

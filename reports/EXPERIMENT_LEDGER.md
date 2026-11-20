@@ -73,3 +73,28 @@ This ledger tracks the provenance, training configuration, execution status, and
 
 *Phase 4.1 Consistency Audit Note: In `data/degradation.py`, `downscale_bicubic()` was updated from naive `cv2.resize(INTER_CUBIC)` to `imresize_matlab(..., antialiasing=True)`, harmonizing the clean surveillance condition with the canonical Set14 benchmark to 0.0000 dB.*
 
+---
+
+## Phase 4.2 Statistical Robustness Validation Summary
+
+*Evaluated across Set14 ($n=14$) and BSD100 ($n=100$) over 5 degradation regimes (Clean, Sensor Noise $\sigma=10$, Motion Blur $k=5, 45^\circ$, JPEG $Q=40$, Combined CCTV) with 10,000 paired bootstrap resamples (seed 42). 9,120 image inferences.*
+
+| Experiment / Evaluation | Scope | Models | Key Finding | Statistical Significance (BSD100 2×) | Artifacts |
+|---|---|---|---|---|---|
+| **Phase 4.2 Clean** | Set14, BSD100 | E9–E14, Legacy, Bicubic | 100% exact parity ($0.0000\text{ dB}$) with canonical benchmarks | E11: $+1.8435\text{ dB}$, CI: $[+1.6666, +2.0389]$ | `results/phase4_2_statistical_summary.csv` |
+| **Phase 4.2 Sensor Noise** | Set14, BSD100 | E9–E14, Legacy, Bicubic | Unconditioned deep models amplify noise below Bicubic | E11: $-0.6242\text{ dB}$, CI: $[-0.7976, -0.4552]$ | `results/phase4_2_statistical_summary.csv` |
+| **Phase 4.2 Motion Blur** | Set14, BSD100 | E9–E14, Legacy, Bicubic | Deep models deblur and sharpen reliably (100% win rate) | E11: $+0.7349\text{ dB}$, CI: $[+0.6908, +0.7819]$ | `results/phase4_2_statistical_summary.csv` |
+| **Phase 4.2 Combined CCTV** | Set14, BSD100 | E9–E14, Legacy, Bicubic | Direct SR improvement over Bicubic is statistically inconclusive | E11: $-0.0018\text{ dB}$, CI: $[-0.0279, +0.0254]$ | `results/phase4_2_statistical_summary.csv` |
+
+---
+
+## Phase 4.3 Denoising Ablation Study Summary
+
+*Evaluated preprocessing denoisers (A0: None, A1: Non-Local Means, A2: Bilateral Filter) on degraded inputs before SR across Set14 and BSD100. 4,104 image inferences.*
+
+| Experiment / Ablation | Models | Denoiser | Runtime Overhead | PSNR Gain vs Raw A0 (BSD100 2× Sensor Noise) | Resulting Gain vs Bicubic Baseline | Operational Recommendation |
+|---|---|---|:---:|:---:|:---:|---|
+| **A1: Non-Local Means** | E9, E11, E12, E14 | OpenCV NLM ($h=3$) | $\approx 203\text{ ms}$ | $+0.1463\text{ dB}$ (CI: $[+0.0525, +0.2596]$) | Still below Bicubic A0 ($-0.4779\text{ dB}$) | Too slow for real-time CCTV; weak filtering |
+| **A2: Bilateral Filter** | E9, E11, E12, E14 | OpenCV Bilateral ($d=5, \sigma=25$) | **$0.86\text{ ms}$** | **$+1.3533\text{ dB}$** (CI: $[+1.1714, +1.5508]$) | **$+0.7291\text{ dB}$ victory over Bicubic** | **Recommended for production & forensics** |
+
+

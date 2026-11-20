@@ -1,11 +1,16 @@
 import {
   EvaluationResults,
   ExperimentId,
+  ModelName,
+  Scale,
+  LossName,
+  DenoiseOption,
   SampleItem,
   TrainingEpoch,
   UpscaleResponse,
   DegradationSettings,
 } from '../types';
+import { resolveExperiment } from '../metricsMath';
 
 let cachedResults: EvaluationResults | null = null;
 let cachedSamples: SampleItem[] | null = null;
@@ -82,13 +87,15 @@ export async function getMockTrainingLog(exp: ExperimentId): Promise<TrainingEpo
 export async function mockSuperResolve(params: {
   imageSrc: string;
   sampleItem?: SampleItem | null;
-  model: 'SRCNN' | 'ESPCN';
-  scale: 2 | 4;
-  loss: 'MSE' | 'MSE + Perceptual';
+  model: ModelName;
+  scale: Scale;
+  loss?: LossName;
+  denoise?: DenoiseOption;
   degradation?: DegradationSettings;
+  isLegacy?: boolean;
 }): Promise<UpscaleResponse> {
   const startTime = performance.now();
-  const delay = 600 + Math.random() * 500;
+  const delay = 400 + Math.random() * 300;
   await new Promise((r) => setTimeout(r, delay));
 
   const img = await loadImage(params.imageSrc);
@@ -117,10 +124,12 @@ export async function mockSuperResolve(params: {
   srCtx.drawImage(img, 0, 0, targetW, targetH);
 
   // Apply convolution unsharp mask
-  applyUnsharpMask(srCtx, targetW, targetH, params.model === 'ESPCN' ? 1.4 : 1.1);
+  const sharpness = params.model === 'EDSR' ? 1.6 : params.model === 'FSRCNN' ? 1.3 : 1.1;
+  applyUnsharpMask(srCtx, targetW, targetH, sharpness);
   const srUrl = srCanvas.toDataURL('image/png');
 
   // 3. Resolve ground truth & metrics if sample item has GT
+  const resolved = resolveExperiment(params.model, params.scale, params.loss, params.isLegacy);
   const sample = params.sampleItem;
   let metrics = null;
   let bicubicMetrics = null;
@@ -129,7 +138,7 @@ export async function mockSuperResolve(params: {
   if (sample && sample.hasGroundTruth) {
     hrUrl = sample.hrUrl || null;
     const results = await getMockResults();
-    const expId = resolveExpId(params.model, params.scale, params.loss);
+    const expId = resolved.id;
     const dsKey = sample.datasetKey || 'Set5_00';
     const group = sample.group as 'Set5' | 'Set14' | 'BSD100';
 
@@ -163,21 +172,10 @@ export async function mockSuperResolve(params: {
     device: 'CUDA · RTX 2050',
     inputSize: [srcW, srcH],
     outputSize: [targetW, targetH],
-    modelId: `${params.model.toLowerCase()}_${params.scale}x_${
-      params.loss === 'MSE' ? 'mse' : 'mse_perceptual'
-    }`,
+    modelId: resolved.modelId,
     scale: params.scale,
-    loss: params.loss,
+    loss: params.loss || 'L1',
   };
-}
-
-function resolveExpId(model: 'SRCNN' | 'ESPCN', scale: 2 | 4, loss: string): ExperimentId {
-  const isMSE = loss === 'MSE';
-  if (model === 'SRCNN') {
-    return scale === 2 ? (isMSE ? 'E1' : 'E2') : isMSE ? 'E3' : 'E4';
-  } else {
-    return scale === 2 ? (isMSE ? 'E5' : 'E6') : isMSE ? 'E7' : 'E8';
-  }
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {

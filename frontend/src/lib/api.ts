@@ -1,6 +1,10 @@
 import {
   EvaluationResults,
   ExperimentId,
+  ModelName,
+  Scale,
+  LossName,
+  DenoiseOption,
   SampleItem,
   TrainingEpoch,
   UpscaleResponse,
@@ -12,6 +16,7 @@ import {
   getMockTrainingLog,
   mockSuperResolve,
 } from './mock/mockData';
+import { resolveExperiment } from './metricsMath';
 
 const BASE_URL = import.meta.env.VITE_API_URL || '';
 const FORCE_MOCK = import.meta.env.VITE_USE_MOCK === 'true';
@@ -69,9 +74,11 @@ export async function fetchTrainingLog(exp: ExperimentId): Promise<TrainingEpoch
 export async function upscaleImage(params: {
   imageSrc: string;
   sampleItem?: SampleItem | null;
-  model: 'SRCNN' | 'ESPCN';
-  scale: 2 | 4;
-  loss: 'MSE' | 'MSE + Perceptual';
+  model: ModelName;
+  scale: Scale;
+  loss?: LossName;
+  denoise?: DenoiseOption;
+  isLegacy?: boolean;
   degradation?: DegradationSettings;
   simulateLr?: boolean;
 }): Promise<UpscaleResponse> {
@@ -80,8 +87,8 @@ export async function upscaleImage(params: {
   }
 
   try {
-    // Model ID convention: {arch}_{scale}x_{loss} e.g. "espcn_4x_mse" or "srcnn_2x_mse_perceptual"
-    const modelId = `${params.model.toLowerCase()}_${params.scale}x_${params.loss === 'MSE' ? 'mse' : 'mse_perceptual'}`;
+    const resolved = resolveExperiment(params.model, params.scale, params.loss, params.isLegacy);
+    const modelId = resolved.modelId;
 
     // Convert imageSrc (data URL or relative URL) to Blob
     const blob = await fetch(params.imageSrc).then((r) => r.blob());
@@ -90,6 +97,9 @@ export async function upscaleImage(params: {
     const srFormData = new FormData();
     srFormData.append('file', blob, 'image.png');
     srFormData.append('model', modelId);
+    if (params.denoise && params.denoise !== 'none') {
+      srFormData.append('denoise', params.denoise);
+    }
     if (params.degradation?.enabled || params.simulateLr) {
       srFormData.append('simulate_lr', 'true');
     }
@@ -135,7 +145,7 @@ export async function upscaleImage(params: {
     let bicubicMetrics = null;
     if (params.sampleItem && params.sampleItem.hasGroundTruth) {
       const results = await getMockResults();
-      const expId = resolveExpId(params.model, params.scale, params.loss);
+      const expId = resolved.id;
       const dsKey = params.sampleItem.datasetKey || 'Set14_01';
       const group = params.sampleItem.group as 'Set5' | 'Set14' | 'BSD100';
       const expData = results[expId]?.results?.[group];
@@ -166,21 +176,12 @@ export async function upscaleImage(params: {
       outputSize: srData.output_size || [512, 512],
       modelId: srData.model_id,
       scale: params.scale,
-      loss: params.loss,
+      loss: params.loss || 'L1',
       metrics: metrics || undefined,
       bicubicMetrics: bicubicMetrics || undefined,
     };
   } catch (e) {
     console.warn('Real backend call failed, falling back to mock engine:', e);
     return mockSuperResolve(params);
-  }
-}
-
-function resolveExpId(model: 'SRCNN' | 'ESPCN', scale: 2 | 4, loss: string): ExperimentId {
-  const isMSE = loss === 'MSE';
-  if (model === 'SRCNN') {
-    return scale === 2 ? (isMSE ? 'E1' : 'E2') : isMSE ? 'E3' : 'E4';
-  } else {
-    return scale === 2 ? (isMSE ? 'E5' : 'E6') : isMSE ? 'E7' : 'E8';
   }
 }

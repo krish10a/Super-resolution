@@ -1,24 +1,44 @@
 import { EvaluationResults, ExperimentId, ModelName, Scale, LossName } from './types';
 
 /**
- * Maps model configuration (model, scale, loss) to ExperimentId E1..E8.
- * E1: srcnn 2x mse
- * E2: srcnn 2x perc
- * E3: srcnn 4x mse
- * E4: srcnn 4x perc
- * E5: espcn 2x mse
- * E6: espcn 2x perc
- * E7: espcn 4x mse
- * E8: espcn 4x perc
+ * Maps model configuration to ExperimentId E1..E14 and its backend model ID / checkpoint.
  */
 export function resolveExperiment(
   model: ModelName,
   scale: Scale,
-  loss: LossName
-): { id: ExperimentId; checkpoint: string; name: string } {
-  const isSRCNN = model === 'SRCNN';
+  loss?: LossName,
+  isLegacy?: boolean
+): { id: ExperimentId; modelId: string; checkpoint: string; name: string } {
   const is2x = scale === 2;
-  const isMSE = loss === 'MSE';
+
+  // Phase 3 DIV2K Models (Default / Recommended)
+  if (!isLegacy && model !== 'SRCNN') {
+    if (model === 'EDSR') {
+      const id: ExperimentId = is2x ? 'E11' : 'E14';
+      const modelId = `edsr_${scale}x_l1`;
+      const checkpoint = `phase3/${id}_edsr_${scale}x_best.pt`;
+      const name = `EDSR ${scale}× · L1 (DIV2K)`;
+      return { id, modelId, checkpoint, name };
+    }
+    if (model === 'ESPCN') {
+      const id: ExperimentId = is2x ? 'E9' : 'E12';
+      const modelId = `espcn_${scale}x_charbonnier`;
+      const checkpoint = `phase3/${id}_espcn_${scale}x_best.pt`;
+      const name = `ESPCN ${scale}× · Charbonnier (DIV2K)`;
+      return { id, modelId, checkpoint, name };
+    }
+    if (model === 'FSRCNN') {
+      const id: ExperimentId = is2x ? 'E10' : 'E13';
+      const modelId = `fsrcnn_${scale}x_charbonnier`;
+      const checkpoint = `phase3/${id}_fsrcnn_${scale}x_best.pt`;
+      const name = `FSRCNN ${scale}× · Charbonnier (DIV2K)`;
+      return { id, modelId, checkpoint, name };
+    }
+  }
+
+  // Legacy Models (E1-E8)
+  const isSRCNN = model === 'SRCNN';
+  const isMSE = !loss || loss === 'MSE';
 
   let id: ExperimentId = 'E1';
   if (isSRCNN) {
@@ -32,10 +52,11 @@ export function resolveExperiment(
   const modelStr = isSRCNN ? 'srcnn' : 'espcn';
   const scaleStr = `${scale}x`;
   const lossStr = isMSE ? 'mse' : 'mse_perceptual';
-  const checkpoint = `${modelStr}_${scaleStr}_${lossStr}.pt`;
-  const name = `${model} ${scale}× · ${loss}`;
+  const modelId = `${modelStr}_${scaleStr}_${lossStr}`;
+  const checkpoint = `${modelId}.pt`;
+  const name = `${model} ${scale}× · ${loss || 'MSE'} (Legacy)`;
 
-  return { id, checkpoint, name };
+  return { id, modelId, checkpoint, name };
 }
 
 /**
@@ -105,6 +126,11 @@ export function computeBenchmarkHeadline(results: EvaluationResults | null): str
   const config = results[bestExp]?.config;
   const scaleStr = config ? `${config.scale}×` : '';
   const sign = bestDelta > 0 ? '+' : '';
+  if (bestDelta > 0) {
+    return `State of the art: ${bestExp} (${config?.model?.toUpperCase() || ''}) achieves +${bestDelta.toFixed(
+      2
+    )} dB over Bicubic on ${bestDataset} ${scaleStr}`;
+  }
   return `Closest to bicubic: ${bestExp} (${config?.model?.toUpperCase() || ''}) at ${sign}${bestDelta.toFixed(
     2
   )} dB on ${bestDataset} ${scaleStr}`;

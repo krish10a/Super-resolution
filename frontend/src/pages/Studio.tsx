@@ -33,6 +33,7 @@ import {
   ModelName,
   Scale,
   LossName,
+  DenoiseOption,
   SampleItem,
   ViewerMode,
   CompareAgainst,
@@ -47,9 +48,11 @@ import { generateDiffMap } from '../lib/diffMap';
 
 export const Studio: React.FC = () => {
   // Model state
-  const [model, setModel] = useState<ModelName>('ESPCN');
-  const [scale, setScale] = useState<Scale>(4);
-  const [loss, setLoss] = useState<LossName>('MSE');
+  const [model, setModel] = useState<ModelName>('EDSR');
+  const [scale, setScale] = useState<Scale>(2);
+  const [loss, setLoss] = useState<LossName>('L1');
+  const [denoise, setDenoise] = useState<DenoiseOption>('none');
+  const [isLegacy, setIsLegacy] = useState<boolean>(false);
 
   // View state
   const [viewMode, setViewMode] = useState<'single' | 'compare4'>('single');
@@ -152,12 +155,12 @@ export const Studio: React.FC = () => {
     if (src) {
       const isSim = Boolean(customImage && simulateCctv);
       if (viewMode === 'single') {
-        runUpscale(src, model, scale, loss, selectedSample, degradation, isSim);
+        runUpscale(src, model, scale, loss, selectedSample, degradation, isSim, denoise, isLegacy);
       } else {
-        runCompare4(src, scale, selectedSample, degradation, isSim);
+        runCompare4(src, scale, selectedSample, degradation, isSim, denoise, isLegacy);
       }
     }
-  }, [customImage, selectedSample, model, scale, loss, viewMode, simulateCctv]);
+  }, [customImage, selectedSample, model, scale, loss, viewMode, simulateCctv, denoise, isLegacy]);
 
   // Compute live metrics if paired ground truth is available (e.g. custom simulated upload)
   useEffect(() => {
@@ -260,7 +263,7 @@ export const Studio: React.FC = () => {
         setCustomDimensions([img.width, img.height]);
         setCustomImage(dataUrl);
         setSelectedSample(null);
-        runUpscale(dataUrl, model, scale, loss, null, degradation, isLarge);
+        runUpscale(dataUrl, model, scale, loss, null, degradation, isLarge, denoise, isLegacy);
       };
       img.src = dataUrl;
     };
@@ -299,7 +302,7 @@ export const Studio: React.FC = () => {
     }
   };
 
-  const resolved = resolveExperiment(model, scale, loss);
+  const resolved = resolveExperiment(model, scale, loss, isLegacy);
   const datasetGroup = (selectedSample?.group as any) || 'Set14';
   const rankInfo = getRank(resolved.id, datasetGroup);
 
@@ -413,7 +416,7 @@ export const Studio: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setSimulateCctv(true);
-                    runUpscale(customImage, model, scale, loss, null, degradation, true);
+                    runUpscale(customImage, model, scale, loss, null, degradation, true, denoise, isLegacy);
                   }}
                   className={`py-1 text-[11px] font-mono-metric-sm rounded transition-all text-center ${
                     simulateCctv
@@ -428,7 +431,7 @@ export const Studio: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setSimulateCctv(false);
-                    runUpscale(customImage, model, scale, loss, null, degradation, false);
+                    runUpscale(customImage, model, scale, loss, null, degradation, false, denoise, isLegacy);
                   }}
                   className={`py-1 text-[11px] font-mono-metric-sm rounded transition-all text-center ${
                     !simulateCctv
@@ -521,30 +524,98 @@ export const Studio: React.FC = () => {
 
       {/* Section: MODEL ARCHITECTURE */}
       <div className="flex flex-col gap-1.5">
-        <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
-          Model Architecture
-        </span>
-        <div className="grid grid-cols-2 p-1 bg-surface-container-lowest rounded-xl border border-outline-variant">
+        <div className="flex items-center justify-between">
+          <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            Model Architecture
+          </span>
           <button
-            onClick={() => setModel('SRCNN')}
-            className={`py-2 text-center font-body-sm-medium text-body-sm-medium rounded-lg transition-all ${
-              model === 'SRCNN'
-                ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
+            type="button"
+            onClick={() => {
+              const nextLegacy = !isLegacy;
+              setIsLegacy(nextLegacy);
+              if (nextLegacy) {
+                setModel('SRCNN');
+                setLoss('MSE');
+              } else {
+                setModel('EDSR');
+                setLoss('L1');
+              }
+            }}
+            className="text-[10px] text-outline hover:text-primary-container transition font-mono-metric-sm"
           >
-            SRCNN
+            {isLegacy ? '← Switch to DIV2K' : 'Legacy (SRCNN)'}
           </button>
-          <button
-            onClick={() => setModel('ESPCN')}
-            className={`py-2 text-center font-body-sm-medium text-body-sm-medium rounded-lg transition-all ${
-              model === 'ESPCN'
-                ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
-                : 'text-on-surface-variant hover:text-on-surface'
-            }`}
-          >
-            ESPCN
-          </button>
+        </div>
+        <div
+          className={`grid ${
+            isLegacy ? 'grid-cols-2' : 'grid-cols-3'
+          } p-1 bg-surface-container-lowest rounded-xl border border-outline-variant`}
+        >
+          {isLegacy ? (
+            <>
+              <button
+                type="button"
+                onClick={() => setModel('SRCNN')}
+                className={`py-2 text-center font-body-sm-medium text-body-sm-medium rounded-lg transition-all ${
+                  model === 'SRCNN'
+                    ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                SRCNN
+              </button>
+              <button
+                type="button"
+                onClick={() => setModel('ESPCN')}
+                className={`py-2 text-center font-body-sm-medium text-body-sm-medium rounded-lg transition-all ${
+                  model === 'ESPCN'
+                    ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+              >
+                ESPCN
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => setModel('EDSR')}
+                className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
+                  model === 'EDSR'
+                    ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+                title="EDSR Baseline (1.37M params) - Top forensic reconstruction quality"
+              >
+                EDSR <span className="text-[10px] opacity-70 block">Quality</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModel('ESPCN')}
+                className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
+                  model === 'ESPCN'
+                    ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+                title="ESPCN (26.8k params) - Sub-pixel CNN >175 FPS real-time"
+              >
+                ESPCN <span className="text-[10px] opacity-70 block">Fast</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setModel('FSRCNN')}
+                className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
+                  model === 'FSRCNN'
+                    ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                    : 'text-on-surface-variant hover:text-on-surface'
+                }`}
+                title="FSRCNN (24.7k params) - Compact deconvolution architecture"
+              >
+                FSRCNN <span className="text-[10px] opacity-70 block">Balanced</span>
+              </button>
+            </>
+          )}
         </div>
       </div>
 
@@ -555,6 +626,7 @@ export const Studio: React.FC = () => {
         </span>
         <div className="grid grid-cols-2 p-1 bg-surface-container-lowest rounded-xl border border-outline-variant">
           <button
+            type="button"
             onClick={() => setScale(2)}
             className={`py-2 text-center font-mono-metric-md text-mono-metric-md rounded-lg transition-all ${
               scale === 2
@@ -565,6 +637,7 @@ export const Studio: React.FC = () => {
             2×
           </button>
           <button
+            type="button"
             onClick={() => setScale(4)}
             className={`py-2 text-center font-mono-metric-md text-mono-metric-md rounded-lg transition-all ${
               scale === 4
@@ -577,34 +650,84 @@ export const Studio: React.FC = () => {
         </div>
       </div>
 
-      {/* Section: LOSS OBJECTIVE */}
+      {/* Section: CCTV PRE-FILTER (Phase 4.3 Denoising) */}
       <div className="flex flex-col gap-1.5">
-        <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
-          Objective Function
-        </span>
+        <div className="flex items-center justify-between">
+          <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            CCTV Pre-Filter
+          </span>
+          <span className="font-mono-metric-sm text-[10px] text-good font-semibold">
+            {denoise === 'bilateral' ? '+1.35 dB Rescue' : 'Pass-through'}
+          </span>
+        </div>
         <div className="grid grid-cols-2 p-1 bg-surface-container-lowest rounded-xl border border-outline-variant">
           <button
-            onClick={() => setLoss('MSE')}
+            type="button"
+            onClick={() => setDenoise('none')}
             className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
-              loss === 'MSE'
+              denoise === 'none'
                 ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            MSE
+            Off
           </button>
           <button
-            onClick={() => setLoss('MSE + Perceptual')}
+            type="button"
+            onClick={() => setDenoise('bilateral')}
             className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
-              loss === 'MSE + Perceptual'
+              denoise === 'bilateral'
                 ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
                 : 'text-on-surface-variant hover:text-on-surface'
             }`}
           >
-            MSE + Perceptual
+            Bilateral Filter
           </button>
         </div>
+        <p className="text-[11px] text-outline px-1">
+          {denoise === 'bilateral'
+            ? 'Fast edge-preserving pre-filter (+0.86ms). Suppresses sensor/CCTV noise.'
+            : 'Direct LR feed without pre-processing.'}
+        </p>
       </div>
+
+      {/* Section: LOSS OBJECTIVE (Legacy Only) */}
+      {isLegacy ? (
+        <div className="flex flex-col gap-1.5">
+          <span className="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">
+            Supervision Loss
+          </span>
+          <div className="grid grid-cols-2 p-1 bg-surface-container-lowest rounded-xl border border-outline-variant">
+            <button
+              type="button"
+              onClick={() => setLoss('MSE')}
+              className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
+                loss === 'MSE'
+                  ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              MSE
+            </button>
+            <button
+              type="button"
+              onClick={() => setLoss('MSE + Perceptual')}
+              className={`py-2 text-center font-body-sm-medium text-[12px] rounded-lg transition-all ${
+                loss === 'MSE + Perceptual'
+                  ? 'text-primary-container bg-surface-container border border-primary-container/40 shadow-sm font-semibold'
+                  : 'text-on-surface-variant hover:text-on-surface'
+              }`}
+            >
+              MSE + Perceptual
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-surface-container/60 px-3 py-2 rounded-lg border border-outline-variant/60 flex items-center justify-between text-mono-metric-sm text-[11px]">
+          <span className="text-outline">DIV2K 50-Epoch</span>
+          <span className="text-primary-container font-medium">{resolved.name.split('·')[1]?.trim() || 'L1'}</span>
+        </div>
+      )}
 
       {/* Checkpoint File Badge */}
       <div className="bg-surface-container px-3 py-2 rounded-lg border border-outline-variant flex items-center justify-between">
@@ -746,10 +869,11 @@ export const Studio: React.FC = () => {
       <div className="mt-auto pt-2">
         <button
           onClick={() => {
+            const isSim = Boolean(customImage && simulateCctv);
             if (viewMode === 'single') {
-              runUpscale(activeInputUrl, model, scale, loss, selectedSample, degradation);
+              runUpscale(activeInputUrl, model, scale, loss, selectedSample, degradation, isSim, denoise, isLegacy);
             } else {
-              runCompare4(activeInputUrl, scale, selectedSample, degradation);
+              runCompare4(activeInputUrl, scale, selectedSample, degradation, isSim, denoise, isLegacy);
             }
           }}
           disabled={loading}
@@ -980,6 +1104,12 @@ export const Studio: React.FC = () => {
             </span>
           </div>
         </div>
+        {denoise === 'bilateral' && (
+          <div className="bg-good/10 border border-good/30 rounded-lg px-2.5 py-1.5 flex items-center justify-between text-[11px] font-mono-metric-sm text-good">
+            <span>Bilateral Filter (+0.86ms)</span>
+            <span>+1.35 dB Rescue</span>
+          </div>
+        )}
       </div>
 
       {/* Card: IN CONTEXT RANKING */}
@@ -1431,22 +1561,45 @@ export const Studio: React.FC = () => {
           ) : (
             /* Compare 4 Quad Grid */
             <div className="flex-1 w-full grid grid-cols-2 grid-rows-2 gap-3 p-3 bg-surface-container-lowest rounded-xl border border-outline-variant overflow-hidden shadow-inner">
-              {[
-                { m: 'SRCNN', l: 'MSE', key: 'srcnn_mse', title: 'SRCNN 4× · MSE' },
-                {
-                  m: 'SRCNN',
-                  l: 'MSE + Perceptual',
-                  key: 'srcnn_perc',
-                  title: 'SRCNN 4× · Perceptual',
-                },
-                { m: 'ESPCN', l: 'MSE', key: 'espcn_mse', title: 'ESPCN 4× · MSE' },
-                {
-                  m: 'ESPCN',
-                  l: 'MSE + Perceptual',
-                  key: 'espcn_perc',
-                  title: 'ESPCN 4× · Perceptual',
-                },
-              ].map((tile) => {
+              {(isLegacy
+                ? [
+                    { m: 'SRCNN', l: 'MSE', key: 'srcnn_mse', title: `SRCNN ${scale}× · MSE` },
+                    {
+                      m: 'SRCNN',
+                      l: 'MSE + Perceptual',
+                      key: 'srcnn_perc',
+                      title: `SRCNN ${scale}× · Perceptual`,
+                    },
+                    { m: 'ESPCN', l: 'MSE', key: 'espcn_mse', title: `ESPCN ${scale}× · MSE` },
+                    {
+                      m: 'ESPCN',
+                      l: 'MSE + Perceptual',
+                      key: 'espcn_perc',
+                      title: `ESPCN ${scale}× · Perceptual`,
+                    },
+                  ]
+                : [
+                    { m: 'EDSR', l: 'L1', key: 'edsr_l1', title: `EDSR ${scale}× · Quality (L1)` },
+                    {
+                      m: 'FSRCNN',
+                      l: 'Charbonnier',
+                      key: 'fsrcnn_charb',
+                      title: `FSRCNN ${scale}× · Balanced`,
+                    },
+                    {
+                      m: 'ESPCN',
+                      l: 'Charbonnier',
+                      key: 'espcn_charb',
+                      title: `ESPCN ${scale}× · Fast`,
+                    },
+                    {
+                      m: 'SRCNN',
+                      l: 'MSE',
+                      key: 'srcnn_legacy',
+                      title: `SRCNN ${scale}× · Legacy`,
+                    },
+                  ]
+              ).map((tile) => {
                 const res = compare4Results[tile.key];
                 return (
                   <div

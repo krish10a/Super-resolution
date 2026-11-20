@@ -3,6 +3,7 @@ import {
   ModelName,
   Scale,
   LossName,
+  DenoiseOption,
   SampleItem,
   UpscaleResponse,
   DegradationSettings,
@@ -20,10 +21,12 @@ export function useUpscale() {
       imageSrc: string,
       model: ModelName,
       scale: Scale,
-      loss: LossName,
+      loss?: LossName,
       sampleItem?: SampleItem | null,
       degradation?: DegradationSettings,
-      simulateLr?: boolean
+      simulateLr?: boolean,
+      denoise?: DenoiseOption,
+      isLegacy?: boolean
     ) => {
       setLoading(true);
       setError(null);
@@ -36,6 +39,8 @@ export function useUpscale() {
           sampleItem,
           degradation,
           simulateLr,
+          denoise,
+          isLegacy,
         });
         setActiveResult(res);
         return res;
@@ -55,17 +60,26 @@ export function useUpscale() {
       scale: Scale,
       sampleItem?: SampleItem | null,
       degradation?: DegradationSettings,
-      simulateLr?: boolean
+      simulateLr?: boolean,
+      denoise?: DenoiseOption,
+      isLegacy?: boolean
     ) => {
       setLoading(true);
       setError(null);
       try {
-        const models: { model: ModelName; loss: LossName; key: string }[] = [
-          { model: 'SRCNN', loss: 'MSE', key: 'srcnn_mse' },
-          { model: 'SRCNN', loss: 'MSE + Perceptual', key: 'srcnn_perc' },
-          { model: 'ESPCN', loss: 'MSE', key: 'espcn_mse' },
-          { model: 'ESPCN', loss: 'MSE + Perceptual', key: 'espcn_perc' },
-        ];
+        const models: { model: ModelName; loss?: LossName; key: string; isLegacy?: boolean }[] = isLegacy
+          ? [
+              { model: 'SRCNN', loss: 'MSE', key: 'srcnn_mse', isLegacy: true },
+              { model: 'SRCNN', loss: 'MSE + Perceptual', key: 'srcnn_perc', isLegacy: true },
+              { model: 'ESPCN', loss: 'MSE', key: 'espcn_mse', isLegacy: true },
+              { model: 'ESPCN', loss: 'MSE + Perceptual', key: 'espcn_perc', isLegacy: true },
+            ]
+          : [
+              { model: 'EDSR', loss: 'L1', key: 'edsr_l1', isLegacy: false },
+              { model: 'FSRCNN', loss: 'Charbonnier', key: 'fsrcnn_charb', isLegacy: false },
+              { model: 'ESPCN', loss: 'Charbonnier', key: 'espcn_charb', isLegacy: false },
+              { model: 'SRCNN', loss: 'MSE', key: 'srcnn_legacy', isLegacy: true },
+            ];
 
         const results: Record<string, UpscaleResponse> = {};
         await Promise.all(
@@ -78,6 +92,8 @@ export function useUpscale() {
               sampleItem,
               degradation,
               simulateLr,
+              denoise,
+              isLegacy: m.isLegacy,
             });
             results[m.key] = res;
           })
